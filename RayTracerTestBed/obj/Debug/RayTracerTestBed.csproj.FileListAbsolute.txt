@@ -1,0 +1,10 @@
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\bin\Debug\RayTracerTestBed.exe.config
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\bin\Debug\RayTracerTestBed.exe
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\bin\Debug\RayTracerTestBed.pdb
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\bin\Debug\OpenTK.dll
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\bin\Debug\OpenTK.dll.config
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\obj\Debug\RayTracerTestBed.csproj.CoreCompileInputs.cache
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\obj\Debug\RayTracerTestBed.csproj.CopyComplete
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\obj\Debug\RayTracerTestBed.exe
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\obj\Debug\RayTracerTestBed.pdb
+D:\UU\Advanced_Graphics\Assignment1\RayTracerTestBed\obj\Debug\RayTracerTestBed.csprojAssemblyReference.cache
