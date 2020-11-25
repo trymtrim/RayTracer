@@ -16,19 +16,19 @@ namespace RayTracerTestBed
 
 		public Polygon(Vector3f[] verts, int[] vertsIndex, int numTris, Vector2f[] st)
 		{
-			int maxIndex = 0;
-
-			for (int i = 0; i < numTris; i++)
-			{
-				if (vertsIndex[i] > maxIndex)
-					maxIndex = vertsIndex[i];
-			}
-
 			//TODO: ?
 			//memcpy?
 			//int32 etc?
 
-			maxIndex += 1;
+			//int maxIndex = 0;
+
+			//for (int i = 0; i < numTris; i++)
+			//{
+			//	if (vertsIndex[i] > maxIndex)
+			//		maxIndex = vertsIndex[i];
+			//}
+
+			//maxIndex += 1;
 
 			vertices = verts;
 			vertexIndex = vertsIndex;
@@ -59,7 +59,7 @@ namespace RayTracerTestBed
 					uv.X = u;
 					uv.Y = v;
 					index = i;
-					intersect |= true; //TODO: Unsure about this '|='
+					intersect |= true;
 				}
 			}
 
