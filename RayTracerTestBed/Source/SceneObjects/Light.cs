@@ -9,10 +9,10 @@ namespace RayTracerTestBed
 {
 	class Light
 	{
-		public Vector3f position;
-		public Vector3f intensity;
+		public Vector3 position;
+		public Vector3 intensity;
 
-		public Light(Vector3f position, Vector3f intensity)
+		public Light(Vector3 position, Vector3 intensity)
 		{
 			this.position = position;
 			this.intensity = intensity;

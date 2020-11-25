@@ -9,12 +9,12 @@ namespace RayTracerTestBed
 {
 	class Polygon : Mesh
 	{
-		private Vector3f[] vertices;
+		private Vector3[] vertices;
 		private int numTriangles;
 		private int[] vertexIndex;
 		private Vector2f[] stCoordinates;
 
-		public Polygon(Vector3f[] verts, int[] vertsIndex, int numTris, Vector2f[] st)
+		public Polygon(Vector3[] verts, int[] vertsIndex, int numTris, Vector2f[] st)
 		{
 			//TODO: ?
 			//memcpy?
@@ -47,9 +47,9 @@ namespace RayTracerTestBed
 
 			for (int i = 0; i < numTriangles; i++)
 			{
-				Vector3f v1 = vertices[vertexIndex[i * 3]];
-				Vector3f v2 = vertices[vertexIndex[i * 3 + 1]];
-				Vector3f v3 = vertices[vertexIndex[i * 3 + 2]];
+				Vector3 v1 = vertices[vertexIndex[i * 3]];
+				Vector3 v2 = vertices[vertexIndex[i * 3 + 1]];
+				Vector3 v3 = vertices[vertexIndex[i * 3 + 2]];
 
 				float t, u, v;
 
@@ -66,15 +66,15 @@ namespace RayTracerTestBed
 			return intersect;
 		}
 
-		public override void GetSurfaceProperties(Vector3f p, Vector3f i, int index, Vector2f uv, out Vector3f n, out Vector2f st)
+		public override void GetSurfaceProperties(Vector3 p, Vector3 i, int index, Vector2f uv, out Vector3 n, out Vector2f st)
 		{
-			Vector3f v1 = vertices[vertexIndex[index * 3]];
-			Vector3f v2 = vertices[vertexIndex[index * 3 + 1]];
-			Vector3f v3 = vertices[vertexIndex[index * 3 + 2]];
+			Vector3 v1 = vertices[vertexIndex[index * 3]];
+			Vector3 v2 = vertices[vertexIndex[index * 3 + 1]];
+			Vector3 v3 = vertices[vertexIndex[index * 3 + 2]];
 
-			Vector3f e1 = Vector3f.Normalize(v2 - v1);
-			Vector3f e2 = Vector3f.Normalize(v3 - v2);
-			n = Vector3f.Normalize(e1.Cross(e2));
+			Vector3 e1 = Vector3.Normalize(v2 - v1);
+			Vector3 e2 = Vector3.Normalize(v3 - v2);
+			n = Vector3.Normalize(Vector3.Cross (e1, e2));
 
 			Vector2f st1 = stCoordinates[vertexIndex[index * 3]];
 			Vector2f st2 = stCoordinates[vertexIndex[index * 3 + 1]];
@@ -83,12 +83,12 @@ namespace RayTracerTestBed
 			st = st1 * (1.0f - uv.X - uv.Y) + st2 * uv.X + st3 * uv.Y;
 		}
 
-		public override Vector3f EvaluateDiffuseColor(Vector2f st)
+		public override Vector3 EvaluateDiffuseColor(Vector2f st)
 		{
 			float scale = 5.0f;
 			float pattern = Math.Max((st.X * scale % 1.0f) > 0.5f ? 1.0f : 0.0f, (st.X * scale % 1.0f) > 0.5f ? 1.0f : 0.0f);
 
-			return pattern == 0.0f ? new Vector3f(0.815f, 0.235f, 0.031f) : new Vector3f(0.937f, 0.937f, 0.231f);
+			return pattern == 0.0f ? new Vector3(0.815f, 0.235f, 0.031f) : new Vector3(0.937f, 0.937f, 0.231f);
 		}
 	}
 }

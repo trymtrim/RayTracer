@@ -14,7 +14,7 @@ namespace RayTracerTestBed
 		public int height;
 		public int maxDepth; //Bounces?
 		public int fov;
-		public Vector3f backgroundColor;
+		public Vector3 backgroundColor;
 		public int antiAliasing;
 		public float bias; //TODO, Unsure if this is actually epsilon
 	}

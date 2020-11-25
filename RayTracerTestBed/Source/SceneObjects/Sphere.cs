@@ -9,10 +9,10 @@ namespace RayTracerTestBed
 {
 	class Sphere : Mesh
 	{
-		public Vector3f center;
+		public Vector3 center;
 		public float radius, radius2;
 
-		public Sphere(Vector3f c, float r)
+		public Sphere(Vector3 c, float r)
 		{
 			center = c;
 			radius = r;
@@ -27,11 +27,11 @@ namespace RayTracerTestBed
 			uv = new Vector2f(0.0f);
 
 			//Analytic solution
-			Vector3f l = ray.origin - center;
+			Vector3 l = ray.origin - center;
 
-			float a = ray.direction.Dot(ray.direction);
-			float b = 2.0f * Vector3f.Dot(ray.direction, l);
-			float c = l.Dot(l) - radius2;
+			float a = Vector3.Dot(ray.direction, ray.direction);
+			float b = 2.0f * Vector3.Dot(ray.direction, l);
+			float c = Vector3.Dot(l, l) - radius2;
 
 			float t1, t2;
 
@@ -50,9 +50,9 @@ namespace RayTracerTestBed
 			return true;
 		}
 
-		public override void GetSurfaceProperties(Vector3f p, Vector3f i, int index, Vector2f uv, out Vector3f n, out Vector2f st)
+		public override void GetSurfaceProperties(Vector3 p, Vector3 i, int index, Vector2f uv, out Vector3 n, out Vector2f st)
 		{
-			n = Vector3f.Normalize(p - center);
+			n = Vector3.Normalize(p - center);
 			st = new Vector2f(0.0f); //Not used, default out value
 		}
 	}

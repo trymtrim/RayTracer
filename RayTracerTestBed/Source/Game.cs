@@ -26,7 +26,7 @@ namespace RayTracerTestBed
 			_settings.height = 480;
 			_settings.maxDepth = 5; //Max 32 rays - TODO: Try reducing this number to increase performance
 			_settings.fov = 90; //TODO: 45 or 90?
-			_settings.backgroundColor = new Vector3f(0.235294f, 0.67451f, 0.843137f);
+			_settings.backgroundColor = new Vector3(0.235294f, 0.67451f, 0.843137f);
 			_settings.bias = 0.00001f; //TODO, Unsure if this is actually epsilon
 			//settings.antiAliasing = //TODO: Set this
 

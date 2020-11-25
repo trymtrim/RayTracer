@@ -14,7 +14,7 @@ namespace RayTracerTestBed
 		public MaterialType materialtype;
 		public float ior;
 		public float kd, ks;
-		public Vector3f diffuseColor;
+		public Vector3 diffuseColor;
 		public float specularExponent;
 
 		public Mesh()
@@ -24,7 +24,7 @@ namespace RayTracerTestBed
 			ior = 1.3f; //Index of refraction - water
 			kd = 0.8f;
 			ks = 0.2f;
-			diffuseColor = new Vector3f(0.2f);
+			diffuseColor = new Vector3(0.2f);
 			specularExponent = 25.0f;
 		}
 
@@ -38,14 +38,14 @@ namespace RayTracerTestBed
 			return false;
 		}
 
-		public virtual void GetSurfaceProperties(Vector3f p, Vector3f i, int index, Vector2f uv, out Vector3f n, out Vector2f st)
+		public virtual void GetSurfaceProperties(Vector3 p, Vector3 i, int index, Vector2f uv, out Vector3 n, out Vector2f st)
 		{
 			//Default out values
-			n = new Vector3f(0.0f);
+			n = new Vector3(0.0f);
 			st = new Vector2f(0.0f);
 		}
 
-		public virtual Vector3f EvaluateDiffuseColor(Vector2f st)
+		public virtual Vector3 EvaluateDiffuseColor(Vector2f st)
 		{
 			return diffuseColor;
 		}
