@@ -14,7 +14,7 @@ namespace RayTracerTestBed
 
 		private const float EPSILON = 0.0001f;
 
-		public static Vector3 Trace(int depth, Scene scene, Ray ray)
+		public static Vector3 Trace(int depth, Scene scene, Ray ray, Vector3 backgroundColor)
 		{ 
 			NearestIntersection(scene.meshes, ray, out float distance, out int? indexOfNearest);
 
@@ -47,13 +47,13 @@ namespace RayTracerTestBed
 				{
 					var direction = ray.direction - 2.0f * Vector3.Dot(ray.direction, normal) * normal;
 					ray = new Ray(intersection + direction * EPSILON, direction); //REMINDER: This might be wrong - want want to initialize a new variable
-					result += specular * Trace(depth - 1, scene, ray);
+					result += specular * Trace(depth - 1, scene, ray, backgroundColor);
 				}
 
 				return color * result;
 			}
 			else
-				return new Vector3(0.0f, 0.0f, 0.0f); //Black
+				return backgroundColor;
 		}
 
 		private static void NearestIntersection(List<Mesh> meshes, Ray ray, out float distance, out int? indexOfNearest)
@@ -65,18 +65,12 @@ namespace RayTracerTestBed
 			{
 				var intersection = meshes[i].Intersect(ray);
 
-				//Console.WriteLine(meshes[i].Intersect(ray));
-
 				if (intersection.HasValue)
 				{
 					float t = intersection.Value;
 
-					//Console.WriteLine(intersection.Value);
-
 					if (t < distance)
 					{
-						//Console.WriteLine("Fail");
-
 						distance = t;
 						indexOfNearest = i;
 					}

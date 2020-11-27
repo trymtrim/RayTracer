@@ -14,10 +14,17 @@ namespace RayTracerTestBed
 		public float specularity;
 		public Vector3 color;
 
-		//Diffuse
+		//Diffuse checkerboard
 		public Material()
 		{
 			checkerboard = true;
+		}
+
+		//Specular checkerboard
+		public Material(float specularity)
+		{
+			checkerboard = true;
+			this.specularity = specularity;
 		}
 
 		//Diffuse
@@ -26,7 +33,7 @@ namespace RayTracerTestBed
 			this.color = color;
 		}
 
-		//Specularity
+		//Specular
 		public Material(Vector3 color, float specularity)
 		{
 			this.color = color;
@@ -40,20 +47,18 @@ namespace RayTracerTestBed
 			Vector3 axis2 = new Vector3(0.0f, 0.0f, 1.0f);
 
 			var p = ray.At(t);
-			var x = Vector3.Dot(axis1, p);
-			var y = Vector3.Dot(axis2, p);
+			var xDot = Vector3.Dot(axis1, p);
+			var x = Math.Abs(xDot);
+			var y = Math.Abs(Vector3.Dot(axis2, p));
 
-			//Console.WriteLine("x: " + x + " y: " + y );
-			if (x % 2.0f > 1.0f != y % 2.0f > 1.0f) //TODO: This might be wrong
-			{
-				//Console.WriteLine("1");
-				return new Vector3(1.0f, 1.0f, 1.0f); //White
-			}
+			bool black;
+
+			if (x % 2.0f > 1.0f != y % 2.0f > 1.0f)
+				black = xDot < 0.0f ? false : true;
 			else
-			{
-				//Console.WriteLine("2");
-				return new Vector3(0.0f, 0.0f, 0.0f); //Black
-			}
+				black = xDot < 0.0f ? true : false;
+
+			return black ? Vector3.Zero : Vector3.One;
 		}
 	}
 }

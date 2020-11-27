@@ -21,16 +21,15 @@ namespace RayTracerTestBed
 			GL.Enable(EnableCap.Texture2D);
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
-			Width = 640;
-			Height = 480;
+			_game = new Game();
+			_game.Init();
+
+			Width = _game.settings.width;
+			Height = _game.settings.height;
 
 			ClientSize = new Size(Width, Height); //(512, 512)
-			_game = new Game();
-			Renderer.screen = new Surface();
 
 			_screenID = Renderer.screen.GenTexture();
-
-			_game.Init();
 		}
 
 		//Called upon app close
@@ -55,6 +54,8 @@ namespace RayTracerTestBed
 
 			if (keyboard[OpenTK.Input.Key.Escape])
 				this.Exit();
+
+			_game.OnUpdateFrame();
 		}
 
 		//Called once per frame; render

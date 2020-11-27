@@ -20,7 +20,7 @@ namespace RayTracerTestBed
 		public Vector3? direction;
 		public Vector3 color;
 
-		public Light(LightType lightType, Vector3 color, Vector3? center, float? radius, Vector3? direction = null)
+		public Light(LightType lightType, Vector3 color, Vector3? center, float? radius, Vector3? direction = null, Vector3? on = null)
 		{
 			this.color = color;
 
@@ -35,8 +35,9 @@ namespace RayTracerTestBed
 					this.direction = direction.Value.Normalized();
 					break;
 				case LightType.Spot:
+					var dir = on.Value - center.Value;
 					mesh = new Sphere(center.Value, radius.Value);
-					this.direction = direction.Value.Normalized();
+					this.direction = dir.Normalized();
 					break;
 			}
 		}
