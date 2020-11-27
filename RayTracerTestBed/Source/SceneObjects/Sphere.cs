@@ -10,50 +10,48 @@ namespace RayTracerTestBed
 	class Sphere : Mesh
 	{
 		public Vector3 center;
-		public float radius, radius2;
+		public float radius;
 
-		public Sphere(Vector3 c, float r)
+		public Sphere(Vector3 center, float radius)
 		{
-			center = c;
-			radius = r;
-			radius2 = r * r;
+			this.center = center;
+			this.radius = radius;
 		}
 
-		public override bool Intersect(Ray ray, out float tNear, out int index, out Vector2f uv)
+		public override float? Intersect(Ray ray)
 		{
-			//Default out values
-			tNear = float.MaxValue;
-			index = -1;
-			uv = new Vector2f(0.0f);
+			var a = Vector3.Dot(ray.direction, ray.direction);
+			var centerToOrigin = ray.origin - center;
 
-			//Analytic solution
-			Vector3 l = ray.origin - center;
+			var b = Vector3.Dot(ray.direction * 2.0f, centerToOrigin);
+			var c = Vector3.Dot(centerToOrigin, centerToOrigin) - radius * radius;
+			var underSqrt = b * b - 4.0f * a * c;
 
-			float a = Vector3.Dot(ray.direction, ray.direction);
-			float b = 2.0f * Vector3.Dot(ray.direction, l);
-			float c = Vector3.Dot(l, l) - radius2;
+			if (underSqrt <= 0.0f)
+				return null;
 
-			float t1, t2;
+			var t1 = (-b - (float)Math.Sqrt(underSqrt)) / (2.0f * a);
+			var t2 = (-b + (float)Math.Sqrt(underSqrt)) / (2.0f * a);
 
-			//TODO: Maybe change to only using/checking triangles everywhere
-			if (!SolveQuadratic(a, b, c, out t1, out t2))
-				return false;
+			//We know t2 is larger than t1
+			if (t1 > 0.0f)
+				return t1;
 
-			if (t1 < 0.0f)
-				t1 = t2;
+			if (t2 > 0.0f)
+				return t2;
 
-			if (t1 < 0.0f)
-				return false;
+			return null; //Behind camera
 
-			tNear = t1;
-
-			return true;
 		}
 
-		public override void GetSurfaceProperties(Vector3 p, Vector3 i, int index, Vector2f uv, out Vector3 n, out Vector2f st)
+		public override Vector3 Normal(Vector3 point)
 		{
-			n = Vector3.Normalize(p - center);
-			st = new Vector2f(0.0f); //Not used, default out value
+			return (point - center).Normalized();
+		}
+
+		public override Vector3 Center() //TODO: Unsure if this is needed
+		{
+			return center;
 		}
 	}
 }

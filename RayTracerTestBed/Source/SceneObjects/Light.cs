@@ -7,15 +7,39 @@ using OpenTK;
 
 namespace RayTracerTestBed
 {
+	enum LightType
+	{
+		Spherical,
+		Directional,
+		Spot
+	}
+
 	class Light
 	{
-		public Vector3 position;
-		public Vector3 intensity;
+		public Mesh mesh;
+		public Vector3? direction;
+		public Vector3 color;
 
-		public Light(Vector3 position, Vector3 intensity)
+		public Light(LightType lightType, Vector3 color, Vector3? center, float? radius, Vector3? direction = null, Vector3? on = null)
 		{
-			this.position = position;
-			this.intensity = intensity;
+			this.color = color;
+
+			switch (lightType)
+			{
+				case LightType.Spherical:
+					mesh = new Sphere(center.Value, radius.Value);
+					this.direction = null;
+					break;
+				case LightType.Directional:
+					mesh = new Plane(direction.Value, -1000.0f); //TODO: Distance is currently a magic number
+					this.direction = direction.Value.Normalized();
+					break;
+				case LightType.Spot:
+					var dir = on.Value - center.Value;
+					mesh = new Sphere(center.Value, radius.Value);
+					this.direction = dir.Normalized();
+					break;
+			}
 		}
 	}
 }

@@ -9,18 +9,20 @@ namespace RayTracerTestBed
 {
 	class DebugWindow
 	{
-		private Stopwatch stopwatch;
-		private int fpsTemp = 0;
+		private static Stopwatch stopwatch;
+		private static int fpsTemp = 0;
 
-		private int fps = 0;
+		private static int fps = 0;
 
-		public DebugWindow()
+
+
+		public static void Initialize()
 		{
 			stopwatch = new Stopwatch();
 			stopwatch.Start();
 		}
 
-		public void Render()
+		public static void Render()
 		{
 			//TODO: Make a better way of tracking FPS
 			fpsTemp++;

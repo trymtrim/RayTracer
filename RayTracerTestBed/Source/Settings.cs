@@ -7,22 +7,14 @@ using OpenTK;
 
 namespace RayTracerTestBed
 {
-	//Currently assuming Whitted-style raytracer
 	struct Settings
 	{
 		public int width;
 		public int height;
-		public int maxDepth; //Bounces?
-		public int fov;
-		public Vector3 backgroundColor;
+		public Scene scene;
+		public int maxDepth; //This decides the amount of bounces
 		public int antiAliasing;
-		public float bias; //TODO, Unsure if this is actually epsilon
-	}
 
-	enum MaterialType
-	{
-		DIFFUSE_AND_GLOSSY,
-		REFLECTION_AND_REFRACTION,
-		REFLECTION
+		public Vector3 backgroundColor;
 	}
 }

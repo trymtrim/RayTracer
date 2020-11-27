@@ -11,41 +11,114 @@ using System.Collections.Generic;
 
 namespace RayTracerTestBed
 {
-	//TODO: Consider removing/changing SceneObjects (to work with only triangles top-level)
-
 	class Game
 	{
-		private Settings _settings;
-		private DebugWindow _debugWindow = new DebugWindow();
-		private Renderer _renderer = new Renderer();
+		private const float MOVEMENT_SPEED = 0.5f;
+
+		public Settings settings;
+		private Camera _camera;
 
 		public void Init()
 		{
 			//Initialize settings
-			_settings.width = 640;
-			_settings.height = 480;
-			_settings.maxDepth = 5; //Max 32 rays - TODO: Try reducing this number to increase performance
-			_settings.fov = 90; //TODO: 45 or 90?
-			_settings.backgroundColor = new Vector3(0.235294f, 0.67451f, 0.843137f);
-			_settings.bias = 0.00001f; //TODO, Unsure if this is actually epsilon
-			//settings.antiAliasing = //TODO: Set this
+			settings.width = 640; //1280;
+			settings.height = 480; //720;
+			settings.scene = new Scene(SceneType.SpheresWithSpot);
+			settings.maxDepth = 5;
+			settings.backgroundColor = Vector3.Zero; //new Vector3(0.235294f, 0.67451f, 0.843137f);
+			settings.antiAliasing = 4; //TODO: Implement anti-aliasing
 
-			_renderer.SetGeometry();
+			//Initialize camera
+			float cameraFOV = 90.0f;
+			var aspectRatio = settings.width / (float)settings.height;
+			Vector3 cameraOrigin = Vector3.Zero;
+			Vector3 cameraDirection = new Vector3(0.0f, 0.0f, 1.0f); //TODO: This is currently not used
 
-			//screen.Clear(0x2222ff); //Make background blue
+			_camera = new Camera(cameraFOV, aspectRatio, cameraOrigin, cameraDirection);
+
+			//Initialize debug window
+			DebugWindow.Initialize();
 		}
 
 		public void Tick()
 		{
-			//screen.Print("hello world!", 2, 2, 0xffffff);
+
+		}
+
+		public void OnUpdateFrame()
+		{
+			var keyboard = OpenTK.Input.Keyboard.GetState();
+
+			if (keyboard[OpenTK.Input.Key.W])
+				MoveForward();
+			if (keyboard[OpenTK.Input.Key.S])
+				MoveBackward();
+			if (keyboard[OpenTK.Input.Key.A])
+				MoveLeft();
+			if (keyboard[OpenTK.Input.Key.D])
+				MoveRight();
+			if (keyboard[OpenTK.Input.Key.ControlLeft])
+				MoveDown();
+			if (keyboard[OpenTK.Input.Key.Space])
+				MoveUp();
+			if (keyboard[OpenTK.Input.Key.Q])
+				RotateLeft();
+			if (keyboard[OpenTK.Input.Key.E])
+				RotateRight();
+		}
+
+		private void MoveForward()
+		{
+			_camera.origin.Z += MOVEMENT_SPEED;
+		}
+
+		private void MoveBackward()
+		{
+			_camera.origin.Z -= MOVEMENT_SPEED;
+		}
+
+		private void MoveLeft()
+		{
+			_camera.origin.X -= MOVEMENT_SPEED;
+		}
+
+		private void MoveRight()
+		{
+			_camera.origin.X += MOVEMENT_SPEED;
+		}
+
+		private void MoveDown()
+		{
+			_camera.origin.Y += MOVEMENT_SPEED;
+		}
+
+		private void MoveUp()
+		{
+			_camera.origin.Y -= MOVEMENT_SPEED;
+		}
+
+		private void RotateLeft()
+		{
+			//TODO: Implement this
+
+			//float angle = 25;
+
+			//var v = _camera.direction;
+			//_camera.direction = new Vector3(
+			//	v.X * (float)Math.Cos(angle) + v.Z * (float)Math.Sin(angle),
+			//	v.Y,
+			//	-v.X * (float) Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
+		}
+
+		private void RotateRight()
+		{
+			//TODO: Implement this
 		}
 
 		public void Render()
 		{
-			_renderer.Render(_settings);
-
-			//scene.Render();
-			_debugWindow.Render();
+			Renderer.Render(settings, _camera);
+			DebugWindow.Render();
 		}
 	}
 }

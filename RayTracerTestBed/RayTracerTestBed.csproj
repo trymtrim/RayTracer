@@ -46,21 +46,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Camera.cs" />
     <Compile Include="Source\Game.cs" />
+    <Compile Include="Source\SceneObjects\Material.cs" />
     <Compile Include="Source\Ray.cs" />
     <Compile Include="Source\SceneObjects\Light.cs" />
     <Compile Include="Source\EntryPoint\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Source\SceneObjects\Mesh.cs" />
-    <Compile Include="Source\SceneObjects\Polygon.cs" />
+    <Compile Include="Source\SceneObjects\Plane.cs" />
+    <Compile Include="Source\Scene.cs" />
     <Compile Include="Source\SceneObjects\Sphere.cs" />
     <Compile Include="Source\Renderer.cs" />
     <Compile Include="Source\Settings.cs" />
     <Compile Include="Source\EntryPoint\Surface.cs" />
     <Compile Include="Source\Utils\DebugWindow.cs" />
     <Compile Include="Source\Utils\MathHelper.cs" />
-    <Compile Include="Source\Utils\Vector2f.cs" />
-    <Compile Include="Source\Utils\Vector3f.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
