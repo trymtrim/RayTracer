@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using OpenTK;
 
 namespace RayTracerTestBed
@@ -12,10 +8,11 @@ namespace RayTracerTestBed
 		private Vector3 _normal;
 		private float _distance;
 
-		public Plane(Vector3 normal, float distance)
+		public Plane(Vector3 normal, float distance, string name = null)
 		{
 			_normal = normal;
 			_distance = distance;
+			this.name = name;
 		}
 
 		public override float? Intersect(Ray ray)
@@ -35,7 +32,17 @@ namespace RayTracerTestBed
 
 		public override Vector3 Center() //TODO: Unsure if this is needed
 		{
-			return Vector3.Zero - (_normal * _normal); //TODO: Remove the "Zero -"
+			return _normal * _normal;
+		}
+
+		public override List<string> DebugInfo()
+		{
+			List<string> debugInfo = new List<string>();
+
+			debugInfo.Add("Position: (0, " + _distance + ", 0)");
+			debugInfo.Add("Normal: " + _normal);
+
+			return debugInfo;
 		}
 	}
 }

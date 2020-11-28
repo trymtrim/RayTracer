@@ -1,30 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 
 namespace RayTracerTestBed
 {
 	class Sphere : Mesh
 	{
-		public Vector3 center;
-		public float radius;
+		private Vector3 _center;
+		private float _radius;
 
-		public Sphere(Vector3 center, float radius)
+		public Sphere(Vector3 center, float radius, string name = null)
 		{
-			this.center = center;
-			this.radius = radius;
+			_center = center;
+			_radius = radius;
+			this.name = name;
 		}
 
 		public override float? Intersect(Ray ray)
 		{
 			var a = Vector3.Dot(ray.direction, ray.direction);
-			var centerToOrigin = ray.origin - center;
+			var centerToOrigin = ray.origin - _center;
 
 			var b = Vector3.Dot(ray.direction * 2.0f, centerToOrigin);
-			var c = Vector3.Dot(centerToOrigin, centerToOrigin) - radius * radius;
+			var c = Vector3.Dot(centerToOrigin, centerToOrigin) - _radius * _radius;
 			var underSqrt = b * b - 4.0f * a * c;
 
 			if (underSqrt <= 0.0f)
@@ -46,12 +44,27 @@ namespace RayTracerTestBed
 
 		public override Vector3 Normal(Vector3 point)
 		{
-			return (point - center).Normalized();
+			return (point - _center).Normalized();
 		}
 
-		public override Vector3 Center() //TODO: Unsure if this is needed
+		public override Vector3 Center()
 		{
-			return center;
+			return _center;
+		}
+
+		public override float Radius()
+		{
+			return _radius;
+		}
+
+		public override List<string> DebugInfo()
+		{
+			List<string> debugInfo = new List<string>();
+
+			debugInfo.Add("Position: " + -_center);
+			debugInfo.Add("Radius: " + _radius);
+
+			return debugInfo;
 		}
 	}
 }

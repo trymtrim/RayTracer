@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace RayTracerTestBed
@@ -12,6 +9,7 @@ namespace RayTracerTestBed
 	{
 		public int width, height;
 		public int[] pixels;
+
 		static private bool _fontReady = false;
 		static private Surface _font;
 		static private int[] _fontRedir;

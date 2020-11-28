@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
@@ -24,8 +21,8 @@ namespace RayTracerTestBed
 			_game = new Game();
 			_game.Init();
 
-			Width = _game.settings.width;
-			Height = _game.settings.height;
+			Width = Game.settings.width;
+			Height = Game.settings.height;
 
 			ClientSize = new Size(Width, Height); //(512, 512)
 
@@ -55,7 +52,12 @@ namespace RayTracerTestBed
 			if (keyboard[OpenTK.Input.Key.Escape])
 				this.Exit();
 
-			_game.OnUpdateFrame();
+			_game.OnUpdateFrame(keyboard);
+		}
+		
+		protected override void OnMouseDown(MouseButtonEventArgs args)
+		{
+			_game.OnMouseButtonDown(new Vector2(args.X, args.Y));
 		}
 
 		//Called once per frame; render

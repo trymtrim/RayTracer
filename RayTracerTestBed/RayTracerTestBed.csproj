@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Source\Camera.cs" />
     <Compile Include="Source\Game.cs" />
+    <Compile Include="Source\GlobalOptions.cs" />
     <Compile Include="Source\SceneObjects\Material.cs" />
     <Compile Include="Source\Ray.cs" />
     <Compile Include="Source\SceneObjects\Light.cs" />
@@ -60,7 +61,9 @@
     <Compile Include="Source\Renderer.cs" />
     <Compile Include="Source\Settings.cs" />
     <Compile Include="Source\EntryPoint\Surface.cs" />
-    <Compile Include="Source\Utils\DebugWindow.cs" />
+    <Compile Include="Source\UI\Button.cs" />
+    <Compile Include="Source\UI\UserInterface.cs" />
+    <Compile Include="Source\Utils\DebugUI.cs" />
     <Compile Include="Source\Utils\MathHelper.cs" />
   </ItemGroup>
   <ItemGroup>

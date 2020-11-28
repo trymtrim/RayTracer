@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using OpenTK;
 
 namespace RayTracerTestBed
 {
 	class Mesh
 	{
+		public string name;
+
 		public virtual float? Intersect(Ray ray)
 		{
 			return float.MaxValue;
@@ -19,9 +17,19 @@ namespace RayTracerTestBed
 			return Vector3.Zero;
 		}
 
-		public virtual Vector3 Center() //TODO: Unsure if this is needed
+		public virtual Vector3 Center()
 		{
 			return Vector3.Zero;
+		}
+
+		public virtual float Radius()
+		{
+			return float.MaxValue;
+		}
+
+		public virtual List<string> DebugInfo()
+		{
+			return new List<string>();
 		}
 	}
 }

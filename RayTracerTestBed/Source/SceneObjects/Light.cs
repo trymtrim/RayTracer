@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
+﻿using OpenTK;
 
 namespace RayTracerTestBed
 {
 	enum LightType
 	{
-		Spherical,
 		Directional,
+		Point,
 		Spot
 	}
 
@@ -26,13 +21,13 @@ namespace RayTracerTestBed
 
 			switch (lightType)
 			{
-				case LightType.Spherical:
+				case LightType.Directional:
+					mesh = new Plane(direction.Value, -1000.0f);
+					this.direction = direction.Value.Normalized();
+					break;
+				case LightType.Point:
 					mesh = new Sphere(center.Value, radius.Value);
 					this.direction = null;
-					break;
-				case LightType.Directional:
-					mesh = new Plane(direction.Value, -1000.0f); //TODO: Distance is currently a magic number
-					this.direction = direction.Value.Normalized();
 					break;
 				case LightType.Spot:
 					var dir = on.Value - center.Value;

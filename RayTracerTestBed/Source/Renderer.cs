@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 
 namespace RayTracerTestBed
@@ -18,8 +15,8 @@ namespace RayTracerTestBed
 		{
 			Bitmap bitmap = new Bitmap(settings.width, settings.height);
 
-			float scale = (float)Math.Tan(MathHelper.DegreesToRadians(camera.fov * 0.5f)); //Test
-			float imageAspectRatio = (float)settings.width / settings.height; //Test
+			float scale = (float)Math.Tan(MathHelper.DegreesToRadians(camera.fov * 0.5f));
+			float imageAspectRatio = (float)settings.width / settings.height;
 
 			Ray ray = new Ray();
 
@@ -31,8 +28,6 @@ namespace RayTracerTestBed
 			{
 				for (int i = 0; i < settings.width; ++i)
 				{
-					//if (_settings.antiAliasing <= 1)
-					//{
 					float x = (2.0f * (i + 0.5f) / settings.width - 1.0f) * imageAspectRatio * scale;
 					float y = (1.0f - 2.0f * (j + 0.5f) / settings.height) * scale;
 
@@ -40,9 +35,13 @@ namespace RayTracerTestBed
 					ray.origin = camera.origin;
 					ray.direction = new Vector3(x, -y, 1.0f);
 
-					//Console.WriteLine(ray.direction);
-
 					var colorVector = Renderer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
+
+					//Render UI
+					Vector3? uiColor = RenderUI(settings, i, j);
+
+					if (uiColor.HasValue)
+						colorVector += uiColor.Value;
 
 					//TODO: Do gamma correction?
 
@@ -52,69 +51,77 @@ namespace RayTracerTestBed
 
 					Color color = Color.FromArgb(255, (int)(red * 255), (int)(green * 255), (int)(blue * 255));
 					bitmap.SetPixel(i, j, color);
-					//}
-					//else
-					//{
-					//TODO: Implement anti-aliasing
-
-					//var colorVector = new Vector3(0.0f, 0.0f, 0.0f);
-
-					//for (int k = 0; k < _settings.antiAliasing; i++)
-					//{
-					//	float x = ((float)randomGenerator.NextDouble() + (2.0f * (i + 0.5f)) / _settings.width - 1.0f) * imageAspectRatio * scale; //Test
-					//	float y = ((float)randomGenerator.NextDouble() + (1.0f - 2.0f * (j + 0.5f)) / _settings.height) * scale; //Test
-
-					//	//Reuse ray
-					//	ray.origin = camera.origin;
-					//	ray.direction = new Vector3(x, -y, 1.0f);
-
-					//	colorVector += Renderer.Trace(_settings.maxDepth, _settings.scene, ray, _settings.backgroundColor);
-					//}
-
-					//float red = MathHelper.Clamp(colorVector.X, 0.0f, 1.0f);
-					//float green = MathHelper.Clamp(colorVector.Y, 0.0f, 1.0f);
-					//float blue = MathHelper.Clamp(colorVector.Z, 0.0f, 1.0f);
-
-					//Color color = Color.FromArgb(255, (int)(red * 255), (int)(green * 255), (int)(blue * 255));
-					//bitmap.SetPixel(i, j, color);
-					//}
 				}
 			}
 
 			screen.UpdateSurface(bitmap);
 		}
 
+		private static Vector3? RenderUI(Settings settings, int widthIndex, int HeightIndex)
+		{
+			for (int i = 0; i < settings.ui.buttons.Count; i++)
+			{
+				Button button = settings.ui.buttons[i];
+				float transparency = button.transparency;
+
+				if (button.IsAtPosition(new Vector2(widthIndex, HeightIndex)))
+					return button.color * (1.0f - transparency);
+			}
+
+			return null;
+		}
+
 		private static Vector3 Trace(int depth, Scene scene, Ray ray, Vector3 backgroundColor)
-		{ 
+		{
 			NearestIntersection(scene.meshes, ray, out float distance, out int? indexOfNearest);
 
 			if (indexOfNearest.HasValue)
 			{
 				int index = indexOfNearest.Value;
-
 				var material = scene.materials[index];
 				Vector3 color = Vector3.Zero;
-				
-				if (material.checkerboard)
-					color = material.GetCheckerboard(ray, distance);
+
+				if (material.texture == Texture.Checkerboard)
+					color = material.CheckerboardPattern(ray, distance);
 				else
-					color = material.color;
+					color = material.Color();
 
 				var intersection = ray.At(distance);
 				var normal = scene.meshes[index].Normal(intersection);
 
 				var result = Vector3.Zero; //Black
-				var specular = material.specularity;
+				var specular = material.Specularity();
 				var diffuse = 1.0f - specular;
-				
+
+				//Diffuse
 				if (diffuse > 0.0f)
 					result += diffuse * DirectIllumination(scene, ray.At(distance), normal);
 
+				float ior = material.IndexOfRefraction();
+
+				//Reflection
 				if (specular > 0.0f && depth > 1)
 				{
 					var direction = ray.direction - 2.0f * Vector3.Dot(ray.direction, normal) * normal;
-					ray = new Ray(intersection + direction * EPSILON, direction); //REMINDER: This might be wrong - want want to initialize a new variable
-					result += specular * Trace(depth - 1, scene, ray, backgroundColor);
+					Ray reflectionRay = new Ray(intersection + direction * EPSILON, direction); //REMINDER: This might be wrong - might want to initialize a new variable
+					Vector3 reflectionColor = specular * Trace(depth - 1, scene, reflectionRay, backgroundColor);
+
+					result += reflectionColor;
+
+					//Reflection and refraction
+					if (ior > 0.0f)
+					{
+						Vector3 refractionColor = Refract(depth - 1, scene, ray, backgroundColor, intersection, normal, ior);
+
+						return reflectionColor + refractionColor * (1.0f - specular);
+					}
+				}
+				else if (ior > 0.0f && depth > 1) //Refraction
+				{
+					//TODO: Implement this
+
+					//Vector3 refractionColor = Refract(depth - 1, scene, ray, backgroundColor, intersection, normal, ior);
+					//return color + refractionColor * 0.1f;
 				}
 
 				return color * result;
@@ -123,7 +130,7 @@ namespace RayTracerTestBed
 				return backgroundColor;
 		}
 
-		private static void NearestIntersection(List<Mesh> meshes, Ray ray, out float distance, out int? indexOfNearest)
+		public static void NearestIntersection(List<Mesh> meshes, Ray ray, out float distance, out int? indexOfNearest)
 		{
 			distance = float.MaxValue;
 			indexOfNearest = null;
@@ -192,12 +199,44 @@ namespace RayTracerTestBed
 						var directionFactor = Vector3.Dot(-pathNormalized, normal); //Photon smearing
 						var distanceDiv = (float)Math.Pow(distance, 2.0f);
 
-						color += light.color * directionFactor / distanceDiv;
+						color += light.color * light.mesh.Radius() * directionFactor / distanceDiv;
 					}
 				}
 			}
 
 			return color;
+		}
+
+		private static Vector3 Refract(int depth, Scene scene, Ray ray, Vector3 backgroundColor, Vector3 intersection, Vector3 normal, float ior)
+		{
+			Vector3 rayDirection = ray.direction;
+
+			//Refraction
+			float cosi = MathHelper.Clamp(Vector3.Dot(rayDirection, normal), -1.0f, 1.0f);
+			float etai = 1.0f, etat = ior;
+			Vector3 n_new = normal;
+
+			if (cosi < 0.0f)
+				cosi = -cosi;
+			else
+			{
+				float buffer = etai;
+				etai = etat;
+				etat = buffer;
+
+				n_new = -normal; //This might be wrong?
+			}
+
+			float eta = etai / etat;
+			float k = 1.0f - eta * eta * (1.0f - cosi * cosi);
+
+			Vector3 refractionDirection = k < 0.0f ? new Vector3(0.0f) : rayDirection * eta + n_new * (eta * cosi - (float)Math.Sqrt(k));
+			refractionDirection = refractionDirection.Normalized();
+			Vector3 refractionRayOrig = (Vector3.Dot(refractionDirection, normal) < 0.0f) ? intersection - normal * EPSILON : intersection + normal * EPSILON;
+
+			Ray refractionRay = new Ray(refractionRayOrig, refractionDirection); //, objects, lights, depth + 1, settings);
+
+			return Trace(depth, scene, refractionRay, backgroundColor);
 		}
 	}
 }

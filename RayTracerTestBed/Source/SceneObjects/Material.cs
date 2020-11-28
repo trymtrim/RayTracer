@@ -1,47 +1,51 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 
 namespace RayTracerTestBed
 {
+	enum Texture
+	{
+		Color,
+		Checkerboard //Checkerboard is currently only supported on planes
+	}
+
 	class Material
 	{
-		public bool checkerboard = false;
+		public Texture texture;
 
-		public float specularity;
-		public Vector3 color;
+		public Vector3 checkerboardSecondColor = Vector3.Zero; //Black as default - Only relevant for materials with checkerboard texture
 
-		//Diffuse checkerboard
-		public Material()
+		private Vector3 color; //Diffuse color
+		private float specularity; //Reflaction rate
+		private float ior; //Index of refraction (water: 1.3, glass: 1.5)
+
+		public bool selected = false;
+		private Vector3 _selectedColor = new Vector3(1.0f, 1.0f, 0.0f);
+
+		public Material(Texture texture, Vector3 color, float specularity = 0.0f, float ior = 0.0f)
 		{
-			checkerboard = true;
-		}
-
-		//Specular checkerboard
-		public Material(float specularity)
-		{
-			checkerboard = true;
-			this.specularity = specularity;
-		}
-
-		//Diffuse
-		public Material(Vector3 color)
-		{
-			this.color = color;
-		}
-
-		//Specular
-		public Material(Vector3 color, float specularity)
-		{
+			this.texture = texture;
 			this.color = color;
 			this.specularity = specularity;
+			this.ior = ior;
 		}
 
-		//Checkerboard pattern
-		public Vector3 GetCheckerboard(Ray ray, float t)
+		public Vector3 Color()
+		{
+			return selected ? _selectedColor : color;
+		}
+
+		public float Specularity()
+		{
+			return specularity;
+		}
+
+		public float IndexOfRefraction()
+		{
+			return ior;
+		}
+
+		public Vector3 CheckerboardPattern(Ray ray, float t)
 		{
 			Vector3 axis1 = new Vector3(1.0f, 0.0f, 0.0f);
 			Vector3 axis2 = new Vector3(0.0f, 0.0f, 1.0f);
@@ -62,7 +66,7 @@ namespace RayTracerTestBed
 			if (yDot < 0.0f)
 				black = !black;
 
-			return black ? Vector3.Zero : Vector3.One;
+			return black ? checkerboardSecondColor : selected ? _selectedColor : color;
 		}
 	}
 }

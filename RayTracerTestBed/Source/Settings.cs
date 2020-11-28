@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
+﻿using OpenTK;
 
 namespace RayTracerTestBed
 {
@@ -12,6 +7,7 @@ namespace RayTracerTestBed
 		public int width;
 		public int height;
 		public Scene scene;
+		public UserInterface ui;
 		public int maxDepth; //This decides the amount of bounces
 		public int antiAliasing;
 
