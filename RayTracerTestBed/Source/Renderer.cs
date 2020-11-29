@@ -93,7 +93,7 @@ namespace RayTracerTestBed
 				if (diffuse > 0.0f)
 					result += diffuse * DirectIllumination(scene, ray.At(distance), normal);
 
-				//Handle transparancy
+				//TODO: NOT SURE ABOUT THIS ONE //result = Vector3.Zero * kr + color * result * (1.0f - kr); //Fresnel: ior = 1.0f+ - adding color(result)/darkness(Vector.Zero) around edges
 
 				if (depth > 1)
 				{

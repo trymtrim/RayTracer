@@ -52,14 +52,14 @@ namespace RayTracerTestBed
 		private void SpawnMap1()
 		{
 			//Point light
-			Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f) * 1.0f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
-			//Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), new Vector3(0.0f, 0.0f, 4.0f), 35.0f);
+			//Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f) * 1.0f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
+			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), new Vector3(0.0f, 0.0f, 4.0f), 35.0f);
 			lights.Add(light);
 
 			//Floor plane at y=2
 			Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), -2.0f, "Floor");
 			meshes.Add(plane);
-			Material planeMaterial = new DiffuseMaterial(Texture.Checkerboard);
+			Material planeMaterial = new ReflectionMaterial(Texture.Checkerboard, 0.9f, new Vector3(1,0,0));
 			materials.Add(planeMaterial);
 
 			//Grey diffuse sphere
