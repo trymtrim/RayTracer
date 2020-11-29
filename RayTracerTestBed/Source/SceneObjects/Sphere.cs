@@ -14,6 +14,8 @@ namespace RayTracerTestBed
 			_center = center;
 			_radius = radius;
 			this.name = name;
+
+			SetIndex();
 		}
 
 		public override float? Intersect(Ray ray)
@@ -61,6 +63,7 @@ namespace RayTracerTestBed
 		{
 			List<string> debugInfo = new List<string>();
 
+			debugInfo.Add("Material: " + Game.settings.scene.materials[_index].materialType.ToString());
 			debugInfo.Add("Position: " + -_center);
 			debugInfo.Add("Radius: " + _radius);
 

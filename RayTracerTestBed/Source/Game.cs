@@ -117,8 +117,6 @@ namespace RayTracerTestBed
 			DebugUI.selectedObject = mesh;
 			DebugUI.selectedMaterial = material;
 			material.selected = true;
-
-			//material.ior = 0.95f;
 		}
 
 		public static void DeselectObject()

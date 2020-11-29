@@ -15,17 +15,7 @@ namespace RayTracerTestBed
 		{
 			Bitmap bitmap = new Bitmap(settings.width, settings.height);
 
-			//float scale = (float)Math.Tan(MathHelper.DegreesToRadians(camera.fov * 0.5f));
-			//float imageAspectRatio = (float)settings.width / settings.height;
-
 			Ray ray = new Ray();
-
-			//Console.WriteLine("scale: " + scale);
-			//Console.WriteLine("ratio: " + imageAspectRatio);
-
-			//Random randomGenerator = new Random();
-			//float random = (float)randomGenerator.NextDouble();
-			//var offset = 
 
 			for (int j = 0; j < settings.height; ++j)
 			{
@@ -79,98 +69,119 @@ namespace RayTracerTestBed
 			{
 				int index = indexOfNearest.Value;
 				var material = scene.materials[index];
-				Vector3 color = Vector3.Zero;
+
+				Vector3 color = Vector3.Zero; //Black
 
 				if (material.texture == Texture.Checkerboard)
 					color = material.CheckerboardPattern(ray, distance);
 				else
-					color = material.Color();
+					color = material.color;
 
 				var intersection = ray.At(distance);
 				var normal = scene.meshes[index].Normal(intersection);
 
-				var refraction = 0.0f;
-
 				var result = Vector3.Zero; //Black
-				var specular = material.Specularity();
 
-				specular = 0.98f;
+				var reflection = material.reflection;
+				var refraction = material.refraction;
+				var ior = material.ior;
+				var transparency = material.transparency;
 
-				var diffuse = 1.0f - specular - refraction;
+				var diffuse = 1.0f - reflection - refraction;
 
 				//Diffuse
 				if (diffuse > 0.0f)
 					result += diffuse * DirectIllumination(scene, ray.At(distance), normal);
 
-				float ior = material.IndexOfRefraction();
-
-				if (material.texture != Texture.Checkerboard)
-				{
-					//ior = 1.3f;
-				}
-				else
-					return color * result;
-
 				//Handle transparancy
 
 				if (depth > 1)
 				{
-					//Reflection
-					if (specular > 0.0f)
+					bool outside = Vector3.Dot(ray.direction, normal) < 0.0f;
+					Vector3 bias = EPSILON * normal;
+
+					switch (material.materialType)
 					{
-						//Refraction//
-						Vector3 refractionColor = new Vector3(0.0f);
-						float kr = 1.0f;
-						bool outside = true;
-						Vector3 bias = EPSILON * normal;
-
-						if (ior > 0.0f)
-						{
-							//ior = 1.0f; //If true transparancy
-							ior = 1.5f;
-							kr = Fresnel(ray.direction, normal, ior);
-
-							outside = Vector3.Dot(ray.direction, normal) < 0.0f;
-
-							//Compute refraction if it is not a case of total internal reflection
-							if (kr < 1.0f)
+						case MaterialType.Diffuse:
 							{
-								Vector3 refractionRayOrigin = outside ? intersection - bias : intersection + bias;
-								Vector3 refractionDirection = Refract(ray.direction, normal, ior).Normalized();
-								Ray refractionRay = new Ray(refractionRayOrigin, refractionDirection);
-								refractionColor = Trace(depth - 1, scene, refractionRay, backgroundColor);
+								result = color * result;
+								break;
 							}
-						}
-						//Refraction end//
+						case MaterialType.Reflection:
+							{
+								Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
+								Vector3 reflectionDirection = Reflect(ray.direction, normal).Normalized();
+								Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
 
-						Vector3 reflectionDirection = Reflect(ray.direction, normal).Normalized();
-						Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
-						Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
+								Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
+								result += reflection * reflectionColor;
 
-						//TODO: Consider making a variable for transparancy - if there should be no color on the object, return reflectionColor instead of adding it to result;
-						//Console.WriteLine(kr);
-						Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
-						result += specular * reflectionColor; //Reflection only (color * result)
-						return color * result;
+								result = color * result;
+								break;
+							}
+						case MaterialType.Refraction:
+							{
+								float kr = Fresnel(ray.direction, normal, ior);
 
-						//TODO: Specularity value is currently not taken into consideration
-						//result = (reflectionColor * kr + refractionColor * (1.0f - kr)) * 0.2f + 0.8f * color; //Refraction and reflection // 1.1 = Looking glass // 1.01f = Cool almost-transparent glass effect // 1.3, 1.5 = water, glass
-						//result += refraction * refractionColor; //Refraction only
-						//result *= color;
-						//result = Vector3.One * kr + color * result * (1.0f - kr); //Outline: ior = 0.95f
-						//NOT SURE ABOUT THIS ONE //result = Vector3.Zero * kr + color * result * (1.0f - kr); //Fresnel: ior = 1.0f+ - adding color(result)/darkness(Vector.Zero) around edges (REMINDER: isn't zero * kr always 0?)
+								if (kr < 1.0f) //TODO: Not sure if this is needed anymore
+								{
+									Vector3 refractionRayOrigin = outside ? intersection - bias : intersection + bias;
+									Vector3 refractionDirection = Refract(ray.direction, normal, ior).Normalized();
+									Ray refractionRay = new Ray(refractionRayOrigin, refractionDirection);
 
-						//Transparancy
-						//result = (color * result * 0.4f + refractionColor * 0.6f); //ior = 1.0f
+									Vector3 refractionColor = Trace(depth - 1, scene, refractionRay, backgroundColor);
+									result += refraction * refractionColor;
+								}
 
-						//kr = Fresnel(ray.direction, normal, 1.01f);
-						//result = (color * result * 0.4f + refractionColor * 0.6f) * (1.0f - kr) + (color * result * 0.4f + refractionColor * 0.6f) * refractionColor * kr; 
+								result = color * result;
+								break;
+							}
+						case MaterialType.Reflection_Refraction:
+							{
+								Vector3 refractionColor = new Vector3(0.0f);
 
-						return result;
+								float kr = Fresnel(ray.direction, normal, ior);
+
+								//Compute refraction if it is not a case of total internal reflection
+								if (kr < 1.0f)
+								{
+									Vector3 refractionDirection = Refract(ray.direction, normal, ior).Normalized();
+									Vector3 refractionRayOrigin = outside ? intersection - bias : intersection + bias;
+									Ray refractionRay = new Ray(refractionRayOrigin, refractionDirection);
+									refractionColor = Trace(depth - 1, scene, refractionRay, backgroundColor);
+								}
+
+								Vector3 reflectionDirection = Reflect(ray.direction, normal).Normalized();
+								Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
+								Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
+
+								Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
+								result += (reflectionColor * kr + refractionColor * (1.0f - kr)) * reflection;
+
+								result = color * result;
+								break;
+							}
+						case MaterialType.Transparent:
+							{
+								Vector3 transparentRayOrigin = outside ? intersection - bias : intersection + bias;
+								Vector3 transparentDirection = ray.direction;
+								Ray refractionRay = new Ray(transparentRayOrigin, transparentDirection);
+
+								Vector3 refractionColor = Trace(depth - 1, scene, refractionRay, backgroundColor);
+								
+								result = color * result * (1.0f - transparency) + refractionColor * transparency;
+								break;
+							}
 					}
 				}
 
-				return color * result;
+				if (material.selected)
+				{
+					float kr = Fresnel(ray.direction, normal, 0.95f);
+					result = Vector3.One * kr + result * (1.0f - kr); //Outline: ior = 0.95f
+				}
+
+				return result;
 			}
 			else
 				return backgroundColor;

@@ -1,11 +1,18 @@
 ﻿using System.Collections.Generic;
 using OpenTK;
+using System;
 
 namespace RayTracerTestBed
 {
 	class Mesh
 	{
 		public string name;
+		protected int _index;
+
+		public void SetIndex()
+		{
+			_index = Scene.scene.meshes.Count;
+		}
 
 		public virtual float? Intersect(Ray ray)
 		{

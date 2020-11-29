@@ -3,47 +3,37 @@ using OpenTK;
 
 namespace RayTracerTestBed
 {
+	enum MaterialType
+	{
+		Diffuse,
+		Reflection,
+		Refraction, //Not fully sure if refraction alone should be a thing
+		Reflection_Refraction,
+		Transparent
+	}
+
 	enum Texture
 	{
 		Color,
 		Checkerboard //Checkerboard is currently only supported on planes
 	}
 
-	class Material
+	abstract class Material
 	{
+		public MaterialType materialType { get; protected set; }
+
 		public Texture texture;
+		public Vector3 color;
+		public float reflection; //Range [0-1]
+		public float refraction; //Range [0-1]
+		public float ior; //Index of refraction (water: 1.3, glass: 1.5, looking glass: 1.1, almost fully transparent glass: 1.01)
+		public float transparency; //Range [0-1]
 
 		public Vector3 checkerboardSecondColor = Vector3.Zero; //Black as default - Only relevant for materials with checkerboard texture
 
-		private Vector3 color; //Diffuse color
-		private float specularity; //Reflaction rate
-		private float ior; //Index of refraction (water: 1.3, glass: 1.5)
-
 		public bool selected = false;
-		private Vector3 _selectedColor = new Vector3(1.0f, 1.0f, 0.0f);
 
-		public Material(Texture texture, Vector3 color, float specularity = 0.0f, float ior = 0.0f)
-		{
-			this.texture = texture;
-			this.color = color;
-			this.specularity = specularity;
-			this.ior = ior;
-		}
-
-		public Vector3 Color()
-		{
-			return selected ? _selectedColor : color;
-		}
-
-		public float Specularity()
-		{
-			return specularity;
-		}
-
-		public float IndexOfRefraction()
-		{
-			return ior;
-		}
+		protected Vector3 _defaultColor = Vector3.One;
 
 		public Vector3 CheckerboardPattern(Ray ray, float t)
 		{
@@ -66,7 +56,7 @@ namespace RayTracerTestBed
 			if (yDot < 0.0f)
 				black = !black;
 
-			return black ? checkerboardSecondColor : selected ? _selectedColor : color;
+			return black ? checkerboardSecondColor : color;
 		}
 	}
 }

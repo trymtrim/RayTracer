@@ -54,6 +54,11 @@
     <Compile Include="Source\SceneObjects\Light.cs" />
     <Compile Include="Source\EntryPoint\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Source\SceneObjects\Materials\DiffuseMaterial.cs" />
+    <Compile Include="Source\SceneObjects\Materials\ReflectionMaterial.cs" />
+    <Compile Include="Source\SceneObjects\Materials\ReflectionRefractionMaterial.cs" />
+    <Compile Include="Source\SceneObjects\Materials\RefractionMaterial.cs" />
+    <Compile Include="Source\SceneObjects\Materials\TransparentMaterial.cs" />
     <Compile Include="Source\SceneObjects\Mesh.cs" />
     <Compile Include="Source\SceneObjects\Plane.cs" />
     <Compile Include="Source\Scene.cs" />

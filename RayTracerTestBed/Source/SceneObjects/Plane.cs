@@ -13,6 +13,8 @@ namespace RayTracerTestBed
 			_normal = normal;
 			_distance = distance;
 			this.name = name;
+
+			SetIndex();
 		}
 
 		public override float? Intersect(Ray ray)
@@ -39,6 +41,7 @@ namespace RayTracerTestBed
 		{
 			List<string> debugInfo = new List<string>();
 
+			debugInfo.Add("Material: " + Game.settings.scene.materials[_index].materialType.ToString());
 			debugInfo.Add("Position: (0, " + _distance + ", 0)");
 			debugInfo.Add("Normal: " + _normal);
 
