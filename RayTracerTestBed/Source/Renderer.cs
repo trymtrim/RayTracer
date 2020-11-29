@@ -15,10 +15,13 @@ namespace RayTracerTestBed
 		{
 			Bitmap bitmap = new Bitmap(settings.width, settings.height);
 
-			float scale = (float)Math.Tan(MathHelper.DegreesToRadians(camera.fov * 0.5f));
-			float imageAspectRatio = (float)settings.width / settings.height;
+			//float scale = (float)Math.Tan(MathHelper.DegreesToRadians(camera.fov * 0.5f));
+			//float imageAspectRatio = (float)settings.width / settings.height;
 
 			Ray ray = new Ray();
+
+			//Console.WriteLine("scale: " + scale);
+			//Console.WriteLine("ratio: " + imageAspectRatio);
 
 			//Random randomGenerator = new Random();
 			//float random = (float)randomGenerator.NextDouble();
@@ -28,14 +31,11 @@ namespace RayTracerTestBed
 			{
 				for (int i = 0; i < settings.width; ++i)
 				{
-					float x = (2.0f * (i + 0.5f) / settings.width - 1.0f) * imageAspectRatio * scale;
-					float y = (1.0f - 2.0f * (j + 0.5f) / settings.height) * scale;
+					float vx = i / (float)settings.width;
+					float vy = j / (float)settings.height;
 
-					//Reuse ray
-					ray.origin = camera.origin;
-					ray.direction = new Vector3(x, -y, 1.0f);
-
-					var colorVector = Renderer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
+					ray = camera.RayThroughScreen(vx, vy);
+					Vector3 colorVector = Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 
 					//Render UI
 					Vector3? uiColor = RenderUI(settings, i, j);
@@ -89,9 +89,14 @@ namespace RayTracerTestBed
 				var intersection = ray.At(distance);
 				var normal = scene.meshes[index].Normal(intersection);
 
+				var refraction = 0.0f;
+
 				var result = Vector3.Zero; //Black
 				var specular = material.Specularity();
-				var diffuse = 1.0f - specular;
+
+				specular = 0.98f;
+
+				var diffuse = 1.0f - specular - refraction;
 
 				//Diffuse
 				if (diffuse > 0.0f)
@@ -99,29 +104,70 @@ namespace RayTracerTestBed
 
 				float ior = material.IndexOfRefraction();
 
-				//Reflection
-				if (specular > 0.0f && depth > 1)
+				if (material.texture != Texture.Checkerboard)
 				{
-					var direction = ray.direction - 2.0f * Vector3.Dot(ray.direction, normal) * normal;
-					Ray reflectionRay = new Ray(intersection + direction * EPSILON, direction); //REMINDER: This might be wrong - might want to initialize a new variable
-					Vector3 reflectionColor = specular * Trace(depth - 1, scene, reflectionRay, backgroundColor);
-
-					result += reflectionColor;
-
-					//Reflection and refraction
-					if (ior > 0.0f)
-					{
-						Vector3 refractionColor = Refract(depth - 1, scene, ray, backgroundColor, intersection, normal, ior);
-
-						return reflectionColor + refractionColor * (1.0f - specular);
-					}
+					//ior = 1.3f;
 				}
-				else if (ior > 0.0f && depth > 1) //Refraction
-				{
-					//TODO: Implement this
+				else
+					return color * result;
 
-					//Vector3 refractionColor = Refract(depth - 1, scene, ray, backgroundColor, intersection, normal, ior);
-					//return color + refractionColor * 0.1f;
+				//Handle transparancy
+
+				if (depth > 1)
+				{
+					//Reflection
+					if (specular > 0.0f)
+					{
+						//Refraction//
+						Vector3 refractionColor = new Vector3(0.0f);
+						float kr = 1.0f;
+						bool outside = true;
+						Vector3 bias = EPSILON * normal;
+
+						if (ior > 0.0f)
+						{
+							//ior = 1.0f; //If true transparancy
+							ior = 1.5f;
+							kr = Fresnel(ray.direction, normal, ior);
+
+							outside = Vector3.Dot(ray.direction, normal) < 0.0f;
+
+							//Compute refraction if it is not a case of total internal reflection
+							if (kr < 1.0f)
+							{
+								Vector3 refractionRayOrigin = outside ? intersection - bias : intersection + bias;
+								Vector3 refractionDirection = Refract(ray.direction, normal, ior).Normalized();
+								Ray refractionRay = new Ray(refractionRayOrigin, refractionDirection);
+								refractionColor = Trace(depth - 1, scene, refractionRay, backgroundColor);
+							}
+						}
+						//Refraction end//
+
+						Vector3 reflectionDirection = Reflect(ray.direction, normal).Normalized();
+						Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
+						Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
+
+						//TODO: Consider making a variable for transparancy - if there should be no color on the object, return reflectionColor instead of adding it to result;
+						//Console.WriteLine(kr);
+						Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
+						result += specular * reflectionColor; //Reflection only (color * result)
+						return color * result;
+
+						//TODO: Specularity value is currently not taken into consideration
+						//result = (reflectionColor * kr + refractionColor * (1.0f - kr)) * 0.2f + 0.8f * color; //Refraction and reflection // 1.1 = Looking glass // 1.01f = Cool almost-transparent glass effect // 1.3, 1.5 = water, glass
+						//result += refraction * refractionColor; //Refraction only
+						//result *= color;
+						//result = Vector3.One * kr + color * result * (1.0f - kr); //Outline: ior = 0.95f
+						//NOT SURE ABOUT THIS ONE //result = Vector3.Zero * kr + color * result * (1.0f - kr); //Fresnel: ior = 1.0f+ - adding color(result)/darkness(Vector.Zero) around edges (REMINDER: isn't zero * kr always 0?)
+
+						//Transparancy
+						//result = (color * result * 0.4f + refractionColor * 0.6f); //ior = 1.0f
+
+						//kr = Fresnel(ray.direction, normal, 1.01f);
+						//result = (color * result * 0.4f + refractionColor * 0.6f) * (1.0f - kr) + (color * result * 0.4f + refractionColor * 0.6f) * refractionColor * kr; 
+
+						return result;
+					}
 				}
 
 				return color * result;
@@ -207,36 +253,68 @@ namespace RayTracerTestBed
 			return color;
 		}
 
-		private static Vector3 Refract(int depth, Scene scene, Ray ray, Vector3 backgroundColor, Vector3 intersection, Vector3 normal, float ior)
+		private static Vector3 Reflect(Vector3 incidentDirection, Vector3 normal)
 		{
-			Vector3 rayDirection = ray.direction;
+			return incidentDirection - 2.0f * Vector3.Dot(incidentDirection, normal) * normal;
+		}
 
-			//Refraction
-			float cosi = MathHelper.Clamp(Vector3.Dot(rayDirection, normal), -1.0f, 1.0f);
-			float etai = 1.0f, etat = ior;
-			Vector3 n_new = normal;
+		private static Vector3 Refract(Vector3 incidentDirection, Vector3 normal, float ior)
+		{
+			float cosi = MathHelper.Clamp(Vector3.Dot(incidentDirection, normal), -1.0f, 1.0f);
+			float etai = 1.0f, etat = ior; //etai is the index of refraction of the medium the ray is in before entering the second medium
+			Vector3 n = normal;
 
 			if (cosi < 0.0f)
 				cosi = -cosi;
 			else
 			{
-				float buffer = etai;
+				//Swap the refraction indices
+				float etaiBuffer = etai;
 				etai = etat;
-				etat = buffer;
+				etat = etaiBuffer;
 
-				n_new = -normal; //This might be wrong?
+				n = -normal;
 			}
 
 			float eta = etai / etat;
 			float k = 1.0f - eta * eta * (1.0f - cosi * cosi);
 
-			Vector3 refractionDirection = k < 0.0f ? new Vector3(0.0f) : rayDirection * eta + n_new * (eta * cosi - (float)Math.Sqrt(k));
-			refractionDirection = refractionDirection.Normalized();
-			Vector3 refractionRayOrig = (Vector3.Dot(refractionDirection, normal) < 0.0f) ? intersection - normal * EPSILON : intersection + normal * EPSILON;
+			return k < 0.0f ? new Vector3(0.0f) : eta * incidentDirection + (eta * cosi - (float)Math.Sqrt(k)) * n;
+		}
 
-			Ray refractionRay = new Ray(refractionRayOrig, refractionDirection); //, objects, lights, depth + 1, settings);
+		private static float Fresnel(Vector3 incidentDirection, Vector3 normal, float ior)
+		{
+			float kr;
 
-			return Trace(depth, scene, refractionRay, backgroundColor);
+			float cosI = MathHelper.Clamp(Vector3.Dot(incidentDirection, normal), -1.0f, 1.0f);
+			float etaI = 1.0f, etaT = ior; //etai is the index of refraction of the medium the ray is in before entering the second medium
+
+			if (cosI > 0.0f)
+			{
+				//Swap the refraction indices
+				float etaiBuffer = etaI;
+				etaI = etaT;
+				etaT = etaiBuffer;
+			}
+
+			//Compute sini using Snell's law
+			float sinT = etaI / etaT * (float)Math.Sqrt(Math.Max(0.0f, 1.0f - cosI * cosI));
+
+			//Total internal reflection
+			if (sinT >= 1.0f)
+				kr = 1.0f;
+			else
+			{
+				float cosT = (float)Math.Sqrt(Math.Max(0.0f, 1.0f - sinT * sinT));
+				cosI = Math.Abs(cosI);
+				float rs = ((etaT * cosI) - (etaI * cosT)) / ((etaT * cosI) + (etaI * cosT));
+				float rp = ((etaI * cosI) - (etaT * cosT)) / ((etaI * cosI) + (etaT * cosT));
+				kr = (rs * rs + rp * rp) / 2.0f;
+			}
+
+			//As a consequence of the conservation of energy, transmittance is given by: kt = 1 - kr;
+
+			return kr;
 		}
 	}
 }

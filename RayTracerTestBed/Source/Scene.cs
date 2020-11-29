@@ -48,7 +48,8 @@ namespace RayTracerTestBed
 		private void SpawnMap1()
 		{
 			//Point light
-			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.1f, 0.1f), new Vector3(0.0f, 0.0f, 4.0f), 35.0f);
+			Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f) * 10.0f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
+			//Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), new Vector3(0.0f, 0.0f, 4.0f), 35.0f);
 			lights.Add(light);
 
 			//Floor plane at y=2
@@ -66,19 +67,25 @@ namespace RayTracerTestBed
 			//Large blue sphere
 			Mesh sphere2 = new Sphere(new Vector3(1.0f, -2.5f, 9.0f), 2.0f, "Sphere2");
 			meshes.Add(sphere2);
-			Material sphere2Material = new Material(Texture.Color, new Vector3(0.0f, 0.0f, 1.0f));
+			Material sphere2Material = new Material(Texture.Color, new Vector3(0.0f, 0.0f, 1.0f), 0.8f, 1.5f);
 			materials.Add(sphere2Material);
 
 			//Specular sphere
 			Mesh sphere3 = new Sphere(new Vector3(-2.0f, 0.5f, 11.0f), 1.5f, "Sphere3");
 			meshes.Add(sphere3);
-			Material sphere3Material = new Material(Texture.Color, new Vector3(1.0f, 1.0f, 1.0f), 0.3f);
+			Material sphere3Material = new Material(Texture.Color, new Vector3(1.0f, 1.0f, 0.0f), 0.8f, 1.5f);
 			materials.Add(sphere3Material);
+
+			//Specular sphere
+			Mesh sphere5 = new Sphere(new Vector3(-3.0f, 0.5f, 20.0f), 1.0f, "Sphere5");
+			meshes.Add(sphere5);
+			Material sphere5Material = new Material(Texture.Color, new Vector3(1.0f, 1.0f, 0.0f));
+			materials.Add(sphere5Material);
 
 			//Semi-specular red sphere
 			Mesh sphere4 = new Sphere(new Vector3(3.0f, 0.5f, 6.0f), 1.5f, "Sphere4");
 			meshes.Add(sphere4);
-			Material sphere4Material = new Material(Texture.Color, new Vector3(1.0f, 0.0f, 0.0f), 0.75f, 1.5f);
+			Material sphere4Material = new Material(Texture.Color, new Vector3(1.0f, 0.0f, 0.0f), 0.8f, 1.5f);
 			materials.Add(sphere4Material);
 		}
 

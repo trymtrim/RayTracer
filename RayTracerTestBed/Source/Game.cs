@@ -7,10 +7,13 @@ namespace RayTracerTestBed
 	class Game
 	{
 		private const float MOVEMENT_SPEED = 0.5f;
+		private const float ROTATION_SPEED = 1.0f;
 
 		public static Settings settings;
 
 		private static Camera _camera;
+
+		private float angle = 0.0f;
 
 		public void Init()
 		{
@@ -20,15 +23,13 @@ namespace RayTracerTestBed
 			settings.scene = new Scene(SceneType.PointLight_VariousMaterials);
 			settings.ui = new UserInterface(settings.width, settings.height);
 			settings.maxDepth = GlobalOptions.MAX_DEPTH;
-			settings.backgroundColor = Vector3.Zero; //new Vector3(0.235294f, 0.67451f, 0.843137f);
+			settings.backgroundColor = new Vector3(0.235294f, 0.67451f, 0.843137f);
 			settings.antiAliasing = 4; //TODO: Implement anti-aliasing
 
 			//Initialize camera
-			float cameraFOV = GlobalOptions.FOV;
-			var aspectRatio = settings.width / (float)settings.height;
 			Vector3 cameraOrigin = new Vector3(0.0f, 0.0f, -2.0f);
-			Vector3 cameraDirection = new Vector3(0.0f, 0.0f, 1.0f); //TODO: This is currently not used
-			_camera = new Camera(cameraFOV, aspectRatio, cameraOrigin, cameraDirection);
+			Vector3 cameraDirection = new Vector3(0.0f, 0.0f, 1.0f);
+			_camera = new Camera(GlobalOptions.FOV, cameraOrigin, cameraDirection);
 
 			//Initialize debug window
 			DebugUI.Initialize();
@@ -61,6 +62,15 @@ namespace RayTracerTestBed
 
 		public void OnMouseButtonDown(Vector2 position)
 		{
+			bool buttonHit = HandleButtonEvents(position);
+
+			if (!buttonHit)
+				HandleObjectSelection(position);
+		}
+
+		private bool HandleButtonEvents(Vector2 position)
+		{
+			//Handle button events
 			bool buttonHit = false;
 			Button button = null;
 
@@ -77,21 +87,24 @@ namespace RayTracerTestBed
 
 			if (buttonHit)
 				button.OnClick();
+
+			return buttonHit;
+		}
+
+		private void HandleObjectSelection(Vector2 position)
+		{
+			float scale = (float)Math.Tan(MathHelper.DegreesToRadians(_camera.fov * 0.5f));
+			float imageAspectRatio = (float)settings.width / settings.height;
+
+			float x = (2.0f * (position.X + 0.5f) / settings.width - 1.0f) * imageAspectRatio * scale;
+			float y = (1.0f - 2.0f * (position.Y + 0.5f) / settings.height) * scale;
+
+			Renderer.NearestIntersection(settings.scene.meshes, new Ray(_camera.position, new Vector3(x, -y, 1.0f)), out float distance, out int? indexOfNearest);
+
+			if (indexOfNearest.HasValue)
+				SelectObject(indexOfNearest.Value);
 			else
-			{
-				float scale = (float)Math.Tan(MathHelper.DegreesToRadians(_camera.fov * 0.5f));
-				float imageAspectRatio = (float)settings.width / settings.height;
-
-				float x = (2.0f * (position.X + 0.5f) / settings.width - 1.0f) * imageAspectRatio * scale;
-				float y = (1.0f - 2.0f * (position.Y + 0.5f) / settings.height) * scale;
-
-				Renderer.NearestIntersection(settings.scene.meshes, new Ray(_camera.origin, new Vector3(x, -y, 1.0f)), out float distance, out int? indexOfNearest);
-
-				if (indexOfNearest.HasValue)
-					SelectObject(indexOfNearest.Value);
-				else
-					DeselectObject();
-			}
+				DeselectObject();
 		}
 
 		private void SelectObject(int index)
@@ -104,6 +117,8 @@ namespace RayTracerTestBed
 			DebugUI.selectedObject = mesh;
 			DebugUI.selectedMaterial = material;
 			material.selected = true;
+
+			//material.ior = 0.95f;
 		}
 
 		public static void DeselectObject()
@@ -150,50 +165,56 @@ namespace RayTracerTestBed
 
 		private void MoveForward()
 		{
-			_camera.origin.Z += MOVEMENT_SPEED;
+			_camera.position += _camera.direction * MOVEMENT_SPEED;
 		}
 
 		private void MoveBackward()
 		{
-			_camera.origin.Z -= MOVEMENT_SPEED;
+			_camera.position -= _camera.direction * MOVEMENT_SPEED;
 		}
 
 		private void MoveLeft()
 		{
-			_camera.origin.X -= MOVEMENT_SPEED;
+			Vector3 upVector = new Vector3(0.0f, 1.0f, 0.0f);
+			_camera.position += Vector3.Cross(_camera.direction, upVector) * MOVEMENT_SPEED;
 		}
 
 		private void MoveRight()
 		{
-			_camera.origin.X += MOVEMENT_SPEED;
+			Vector3 upVector = new Vector3(0.0f, 1.0f, 0.0f);
+			_camera.position -= Vector3.Cross(_camera.direction, upVector) * MOVEMENT_SPEED;
 		}
 
 		private void MoveDown()
 		{
-			_camera.origin.Y += MOVEMENT_SPEED;
+			_camera.position.Y += MOVEMENT_SPEED;
 		}
 
 		private void MoveUp()
 		{
-			_camera.origin.Y -= MOVEMENT_SPEED;
+			_camera.position.Y -= MOVEMENT_SPEED;
 		}
 
 		private void RotateLeft()
 		{
-			//TODO: Implement this
+			angle += ROTATION_SPEED;
 
-			//float angle = 25;
-
-			//var v = _camera.direction;
-			//_camera.direction = new Vector3(
-			//	v.X * (float)Math.Cos(angle) + v.Z * (float)Math.Sin(angle),
-			//	v.Y,
-			//	-v.X * (float) Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
+			var v = _camera.direction;
+			_camera.direction = new Vector3(
+				v.X * (float)Math.Cos(angle) + v.Z * (float)Math.Sin(angle),
+				v.Y,
+				-v.X * (float) Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
 		}
 
 		private void RotateRight()
 		{
-			//TODO: Implement this
+			angle -= ROTATION_SPEED;
+
+			var v = _camera.direction;
+			_camera.direction = new Vector3(
+				v.X * (float)Math.Cos(angle) + v.Z * (float)Math.Sin(angle),
+				v.Y,
+				-v.X * (float)Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
 		}
 
 		public void Render()
