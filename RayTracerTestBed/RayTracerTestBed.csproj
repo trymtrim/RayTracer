@@ -48,7 +48,8 @@
   <ItemGroup>
     <Compile Include="Source\Camera.cs" />
     <Compile Include="Source\Game.cs" />
-    <Compile Include="Source\GlobalOptions.cs" />
+    <Compile Include="Source\Config.cs" />
+    <Compile Include="Source\PathTracer.cs" />
     <Compile Include="Source\SceneObjects\Material.cs" />
     <Compile Include="Source\Ray.cs" />
     <Compile Include="Source\SceneObjects\Light.cs" />

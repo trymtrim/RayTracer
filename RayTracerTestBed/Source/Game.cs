@@ -26,7 +26,7 @@ namespace RayTracerTestBed
 			settings.scene = new Scene(SceneType.Room);
 			settings.ui = new UserInterface(settings.width, settings.height);
 			settings.maxDepth = Config.MAX_DEPTH;
-			settings.backgroundColor = new Vector3(0.235294f, 0.67451f, 0.843137f);
+			settings.backgroundColor = Vector3.Zero; new Vector3(0.235294f, 0.67451f, 0.843137f);
 			settings.traceMethod = Config.DEFAULT_TRACE_METHOD;
 			settings.showUI = true;
 			settings.antiAliasing = 4; //TODO: Implement anti-aliasing

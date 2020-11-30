@@ -13,6 +13,8 @@ namespace RayTracerTestBed
 
 		public static void Render(Settings settings, Camera camera)
 		{
+			MathHelper.ResetSeed(); //Temp
+
 			Bitmap bitmap = new Bitmap(settings.width, settings.height);
 
 			Ray ray = new Ray();
@@ -21,21 +23,37 @@ namespace RayTracerTestBed
 			{
 				for (int i = 0; i < settings.width; ++i)
 				{
+					Vector3 colorVector;
+
 					float vx = i / (float)settings.width;
 					float vy = j / (float)settings.height;
 
 					ray = camera.RayThroughScreen(vx, vy);
 
-					Vector3 colorVector;
-
 					if (settings.traceMethod == TraceMethod.WhittedRayTracing)
-						colorVector = Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
+						colorVector = Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor); //TODO: Move RayTracing methods to separate class
 					else
 					{
+						int samplePoints = 100;
 
+						colorVector = PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor, new Vector2(vx, vy));
 
-						//TODO: Sample random color points instead?
-						colorVector = PathTracer.TracePath(settings.maxDepth, settings.scene, ray, settings.backgroundColor, new Vector2(j, i));
+						for (int k = 1; k < samplePoints; k++)
+						{
+							var offsetXMin = -(0.5f / settings.width);
+							var offsetXMax = (0.5f / settings.width);
+							var offsetYMin = -(0.5f / settings.height);
+							var offsetYMax = (0.5f / settings.height);
+
+							var x = vx + MathHelper.RandomRange(offsetXMin, offsetXMax);
+							var y = vy + MathHelper.RandomRange(offsetYMin, offsetYMax);
+
+							ray = camera.RayThroughScreen(x, y);
+
+							colorVector += PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor, new Vector2(x, y));
+						}
+
+						colorVector /= samplePoints;
 					}
 
 					if (settings.showUI)
@@ -47,7 +65,7 @@ namespace RayTracerTestBed
 							colorVector += uiColor.Value;
 					}
 
-					//TODO: Do gamma correction?
+					//TODO: Do gamma correction? Apply post processing?
 
 					float red = MathHelper.Clamp(colorVector.X, 0.0f, 1.0f);
 					float green = MathHelper.Clamp(colorVector.Y, 0.0f, 1.0f);
@@ -105,7 +123,7 @@ namespace RayTracerTestBed
 
 				//Diffuse
 				if (diffuse > 0.0f)
-					result += diffuse * DirectIllumination(scene, ray.At(distance), normal);
+					result += diffuse * DirectIllumination(scene, intersection, normal);
 
 				//TODO: NOT SURE ABOUT THIS ONE //result = Vector3.Zero * kr + color * result * (1.0f - kr); //Fresnel: ior = 1.0f+ - adding color(result)/darkness(Vector.Zero) around edges
 

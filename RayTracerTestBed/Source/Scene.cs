@@ -56,14 +56,14 @@ namespace RayTracerTestBed
 		private void SpawnMap1()
 		{
 			//Point light
-			//Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f) * 1.0f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
-			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), new Vector3(0.0f, 0.0f, 4.0f), 1.0f); //35.0f
+			Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f) * 0.5f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
+			//Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), new Vector3(0.0f, 0.0f, 4.0f), 1.0f); //35.0f
 			lights.Add(light);
 
 			//Floor plane
 			Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.0f, 8.0f), new Vector3(10.0f, 10.0f, 10.0f), "Floor");
 			meshes.Add(plane);
-			Material planeMaterial = new ReflectionMaterial(Texture.Checkerboard, 0.9f, new Vector3(1,0,0));
+			Material planeMaterial = new DiffuseMaterial(Texture.Checkerboard, new Vector3(1,1,1));
 			materials.Add(planeMaterial);
 
 			//Grey diffuse sphere
@@ -73,28 +73,10 @@ namespace RayTracerTestBed
 			materials.Add(sphere1Material);
 
 			//Blue refraction and reflection sphere
-			Mesh sphere2 = new Sphere(new Vector3(1.0f, -2.5f, 9.0f), 2.0f, "Sphere2");
+			Mesh sphere2 = new Sphere(new Vector3(1.0f, 0.0f, 9.0f), 2.0f, "Sphere2");
 			meshes.Add(sphere2);
-			Material sphere2Material = new ReflectionRefractionMaterial(Texture.Color, 1.5f, 1.0f, new Vector3(0.0f, 0.0f, 1.0f));
+			Material sphere2Material = new DiffuseMaterial(Texture.Color, new Vector3(0.0f, 0.0f, 1.0f));
 			materials.Add(sphere2Material);
-
-			//Refraction sphere
-			Mesh sphere3 = new Sphere(new Vector3(-2.0f, 0.5f, 11.0f), 1.5f, "Sphere3");
-			meshes.Add(sphere3);
-			Material sphere3Material = new RefractionMaterial(Texture.Color, 1.5f);
-			materials.Add(sphere3Material);
-
-			//Yellow sphere behind refraction sphere
-			Mesh sphere5 = new Sphere(new Vector3(-3.0f, 0.5f, 20.0f), 1.0f, "Sphere5");
-			meshes.Add(sphere5);
-			Material sphere5Material = new DiffuseMaterial(Texture.Color, new Vector3(1.0f, 1.0f, 0.0f));
-			materials.Add(sphere5Material);
-
-			//Red reflection sphere
-			Mesh sphere4 = new Sphere(new Vector3(3.0f, 0.5f, 6.0f), 1.5f, "Sphere4");
-			meshes.Add(sphere4);
-			Material sphere4Material = new ReflectionMaterial(Texture.Color, 0.9f);
-			materials.Add(sphere4Material);
 		}
 
 		private void SpawnMap2()
@@ -217,7 +199,7 @@ namespace RayTracerTestBed
 		private void SpawnMap6()
 		{
 			//Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f) * 1.0f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
-			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), new Vector3(0.0f, -0.6f, 2.5f), 4.0f);
+			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), new Vector3(0.0f, -0.6f, 2.5f), 0.5f);
 			lights.Add(light);
 
 			//Floor
@@ -259,13 +241,13 @@ namespace RayTracerTestBed
 			//Mirror ball
 			Mesh sphere1 = new Sphere(new Vector3(-0.9f, 1.35f, 3.0f), 0.65f, "Mirror Ball");
 			meshes.Add(sphere1);
-			Material sphere1Material = new ReflectionMaterial(Texture.Color, 0.98f);
+			Material sphere1Material = new DiffuseMaterial(Texture.Color, new Vector3(0.25f, 0.25f, 0.75f));
 			materials.Add(sphere1Material);
 
 			//Glass ball
 			Mesh sphere2 = new Sphere(new Vector3(1.0f, 1.35f, 2.25f), 0.65f, "Glass Ball");
 			meshes.Add(sphere2);
-			Material sphere2Material = new ReflectionRefractionMaterial(Texture.Color, 1.5f);
+			Material sphere2Material = new DiffuseMaterial(Texture.Color, new Vector3(0.75f, 0.75f, 0.75f));
 			materials.Add(sphere2Material);
 		}
 	}

@@ -15,8 +15,6 @@ namespace RayTracerTestBed
 		static private int[] _fontRedir;
 		static private string ch = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_-+={}[];:<>,.?/\\ ";
 
-		private Bitmap bmp;
-
 		public Surface(string fileName)
 		{
 			Bitmap bmp = new Bitmap(fileName);
@@ -40,8 +38,6 @@ namespace RayTracerTestBed
 
 		public void UpdateSurface(Bitmap bmp)
 		{
-			this.bmp = bmp;
-
 			width = bmp.Width;
 			height = bmp.Height;
 			pixels = new int[width * height];
