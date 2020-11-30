@@ -21,7 +21,7 @@ namespace RayTracerTestBed
 			Button button3 = new Button(new Vector2(screenWidth - 90, 120), new Vector2(160, 40), buttonColor, Game.ChangeScene, 0.3f, "Change Scene");
 			buttons.Add(button3);
 
-			Button button4 = new Button(new Vector2(screenWidth - 90, 165), new Vector2(160, 40), buttonColor, PrintErrorMessage, 0.3f, "Ch.TraceType");
+			Button button4 = new Button(new Vector2(screenWidth - 90, 165), new Vector2(160, 40), buttonColor, Game.ChangeTraceMethod, 0.3f, "Ch.TraceType");
 			buttons.Add(button4);
 		}
 

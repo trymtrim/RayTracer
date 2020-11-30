@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using OpenTK;
 using OpenTK.Input;
 
@@ -15,21 +16,25 @@ namespace RayTracerTestBed
 
 		private float angle = 0.0f;
 
+		private Stopwatch stopwatch = new Stopwatch();
+
 		public void Init()
 		{
 			//Initialize settings
-			settings.width = GlobalOptions.ASPECT_RATIO_WIDTH;
-			settings.height = GlobalOptions.ASPECT_RATIO_HEIGHT;
-			settings.scene = new Scene(SceneType.PointLight_VariousMaterials);
+			settings.width = Config.ASPECT_RATIO_WIDTH;
+			settings.height = Config.ASPECT_RATIO_HEIGHT;
+			settings.scene = new Scene(SceneType.Room);
 			settings.ui = new UserInterface(settings.width, settings.height);
-			settings.maxDepth = GlobalOptions.MAX_DEPTH;
+			settings.maxDepth = Config.MAX_DEPTH;
 			settings.backgroundColor = new Vector3(0.235294f, 0.67451f, 0.843137f);
+			settings.traceMethod = Config.DEFAULT_TRACE_METHOD;
+			settings.showUI = true;
 			settings.antiAliasing = 4; //TODO: Implement anti-aliasing
 
 			//Initialize camera
-			Vector3 cameraOrigin = new Vector3(0.0f, 0.0f, -2.0f);
+			Vector3 cameraOrigin = new Vector3(0.0f, 0.5f, -1.75f); //(0.0f, 0.0f, -2.0f)
 			Vector3 cameraDirection = new Vector3(0.0f, 0.0f, 1.0f);
-			_camera = new Camera(GlobalOptions.FOV, cameraOrigin, cameraDirection);
+			_camera = new Camera(Config.FOV, cameraOrigin, cameraDirection);
 
 			//Initialize debug window
 			DebugUI.Initialize();
@@ -58,6 +63,26 @@ namespace RayTracerTestBed
 				RotateLeft();
 			if (keyboard[OpenTK.Input.Key.E])
 				RotateRight();
+
+			if (keyboard[OpenTK.Input.Key.Z])
+			{
+				if (stopwatch.IsRunning)
+				{
+					if (stopwatch.Elapsed.TotalMilliseconds > 1000)
+					{
+						Console.WriteLine("Toggle");
+						ToggleUI();
+						stopwatch.Restart();
+					}
+				}
+				else
+				{
+					ToggleUI();
+					stopwatch.Start();
+
+					Console.WriteLine("Toggle First");
+				}
+			}
 		}
 
 		public void OnMouseButtonDown(Vector2 position)
@@ -151,9 +176,25 @@ namespace RayTracerTestBed
 					settings.scene = new Scene(SceneType.Mirrors);
 					break;
 				case SceneType.Mirrors:
+					settings.scene = new Scene(SceneType.Room);
+					break;
+				case SceneType.Room:
 					settings.scene = new Scene(SceneType.PointLight_VariousMaterials);
 					break;
-			}	
+			}
+		}
+
+		public static void ChangeTraceMethod()
+		{
+			switch (settings.traceMethod)
+			{
+				case TraceMethod.WhittedRayTracing:
+					settings.traceMethod = TraceMethod.PathTracing;
+					break;
+				case TraceMethod.PathTracing:
+					settings.traceMethod = TraceMethod.WhittedRayTracing;
+					break;
+			}
 		}
 
 		public static void ResetCamera()
@@ -201,7 +242,7 @@ namespace RayTracerTestBed
 			_camera.direction = new Vector3(
 				v.X * (float)Math.Cos(angle) + v.Z * (float)Math.Sin(angle),
 				v.Y,
-				-v.X * (float) Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
+				-v.X * (float)Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
 		}
 
 		private void RotateRight()
@@ -215,11 +256,20 @@ namespace RayTracerTestBed
 				-v.X * (float)Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
 		}
 
+		private void ToggleUI()
+		{
+			settings.showUI = !settings.showUI;
+		}
+
 		public void Render()
 		{
 			Renderer.Render(settings, _camera);
-			DebugUI.Render(settings);
-			settings.ui.RenderText();
+
+			if (settings.showUI)
+			{
+				DebugUI.Render(settings);
+				settings.ui.RenderText();
+			}
 		}
 	}
 }

@@ -25,13 +25,27 @@ namespace RayTracerTestBed
 					float vy = j / (float)settings.height;
 
 					ray = camera.RayThroughScreen(vx, vy);
-					Vector3 colorVector = Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 
-					//Render UI
-					Vector3? uiColor = RenderUI(settings, i, j);
+					Vector3 colorVector;
 
-					if (uiColor.HasValue)
-						colorVector += uiColor.Value;
+					if (settings.traceMethod == TraceMethod.WhittedRayTracing)
+						colorVector = Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
+					else
+					{
+
+
+						//TODO: Sample random color points instead?
+						colorVector = PathTracer.TracePath(settings.maxDepth, settings.scene, ray, settings.backgroundColor, new Vector2(j, i));
+					}
+
+					if (settings.showUI)
+					{
+						//Render UI
+						Vector3? uiColor = RenderUI(settings, i, j);
+
+						if (uiColor.HasValue)
+							colorVector += uiColor.Value;
+					}
 
 					//TODO: Do gamma correction?
 
@@ -70,7 +84,7 @@ namespace RayTracerTestBed
 				int index = indexOfNearest.Value;
 				var material = scene.materials[index];
 
-				Vector3 color = Vector3.Zero; //Black
+				Vector3 color;
 
 				if (material.texture == Texture.Checkerboard)
 					color = material.CheckerboardPattern(ray, distance);
@@ -148,6 +162,7 @@ namespace RayTracerTestBed
 									Vector3 refractionDirection = Refract(ray.direction, normal, ior).Normalized();
 									Vector3 refractionRayOrigin = outside ? intersection - bias : intersection + bias;
 									Ray refractionRay = new Ray(refractionRayOrigin, refractionDirection);
+
 									refractionColor = Trace(depth - 1, scene, refractionRay, backgroundColor);
 								}
 
@@ -165,11 +180,11 @@ namespace RayTracerTestBed
 							{
 								Vector3 transparentRayOrigin = outside ? intersection - bias : intersection + bias;
 								Vector3 transparentDirection = ray.direction;
-								Ray refractionRay = new Ray(transparentRayOrigin, transparentDirection);
+								Ray transparentRay = new Ray(transparentRayOrigin, transparentDirection);
 
-								Vector3 refractionColor = Trace(depth - 1, scene, refractionRay, backgroundColor);
+								Vector3 transparentColor = Trace(depth - 1, scene, transparentRay, backgroundColor);
 								
-								result = color * result * (1.0f - transparency) + refractionColor * transparency;
+								result = color * result * (1.0f - transparency) + transparentColor * transparency;
 								break;
 							}
 					}
@@ -177,14 +192,15 @@ namespace RayTracerTestBed
 
 				if (material.selected)
 				{
+					//Outline
 					float kr = Fresnel(ray.direction, normal, 0.95f);
-					result = Vector3.One * kr + result * (1.0f - kr); //Outline: ior = 0.95f
+					result = Vector3.One * kr + result * (1.0f - kr);
 				}
 
 				return result;
 			}
-			else
-				return backgroundColor;
+			
+			return backgroundColor;
 		}
 
 		public static void NearestIntersection(List<Mesh> meshes, Ray ray, out float distance, out int? indexOfNearest)

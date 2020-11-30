@@ -33,15 +33,23 @@ namespace RayTracerTestBed
 
 			Renderer.screen.Print("FPS: " + _fps, settings.width / 2 - 35, 2, 0xffffff);
 
-			Renderer.screen.Print("Scene: " + settings.scene.sceneType.ToString(), 10, 10, 0xffffff);
-			Renderer.screen.Print(selectedObject == null ? "No selected object" : selectedObject.name == null ? "Unnamed object" : "Selected: " + selectedObject.name, 10, 40, 0xffffff);
+			Renderer.screen.Print("Trace method: " + settings.traceMethod.ToString(), 10, 10, 0xffffff);
+			Renderer.screen.Print("Scene: " + settings.scene.sceneType.ToString(), 10, 40, 0xffffff);
+			Renderer.screen.Print(selectedObject == null ? "No selected object" : selectedObject.name == null ? "Unnamed object" : "Selected: " + selectedObject.name, 10, 70, 0xffffff);
 
 			if (selectedObject != null)
 			{
 				List<string> debugInfo = selectedObject.DebugInfo();
 
+				int space = 0;
+
 				for (int i = 0; i < debugInfo.Count; i++)
-					Renderer.screen.Print(debugInfo[i], 10, 70 + 20 * i, 0xffffff);
+				{
+					if (debugInfo[i].Contains("Position"))
+						space = 10;
+
+					Renderer.screen.Print(debugInfo[i], 10, 100 + 20 * i + space, 0xffffff);
+				}
 			}
 		}
 	}

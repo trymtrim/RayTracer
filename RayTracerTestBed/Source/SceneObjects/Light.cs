@@ -22,7 +22,7 @@ namespace RayTracerTestBed
 			switch (lightType)
 			{
 				case LightType.Directional:
-					mesh = new Plane(direction.Value, -1000.0f);
+					mesh = new Plane(direction.Value, new Vector3(0.0f, -1000.0f, 0.0f));
 					this.direction = direction.Value.Normalized();
 					break;
 				case LightType.Point:

@@ -61,9 +61,8 @@ namespace RayTracerTestBed
 
 		public override List<string> DebugInfo()
 		{
-			List<string> debugInfo = new List<string>();
+			List<string> debugInfo = base.DebugInfo();
 
-			debugInfo.Add("Material: " + Game.settings.scene.materials[_index].materialType.ToString());
 			debugInfo.Add("Position: " + -_center);
 			debugInfo.Add("Radius: " + _radius);
 

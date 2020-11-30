@@ -36,7 +36,37 @@ namespace RayTracerTestBed
 
 		public virtual List<string> DebugInfo()
 		{
-			return new List<string>();
+			List<string> debugInfo = new List<string>();
+
+			Material material = Game.settings.scene.materials[_index];
+			debugInfo.Add("Material: " + material.materialType.ToString());
+
+			switch (material.materialType)
+			{
+				case MaterialType.Diffuse:
+					debugInfo.Add("Color: " + material.color);
+					break;
+				case MaterialType.Reflection:
+					debugInfo.Add("Color: " + material.color);
+					debugInfo.Add("Reflection Rate: " + material.reflection);
+					break;
+				case MaterialType.Refraction:
+					debugInfo.Add("Color: " + material.color);
+					debugInfo.Add("Refraction Rate: " + material.refraction);
+					debugInfo.Add("Index of Refraction: " + material.ior);
+					break;
+				case MaterialType.Reflection_Refraction:
+					debugInfo.Add("Color: " + material.color);
+					debugInfo.Add("R&R Rate: " + material.reflection);
+					debugInfo.Add("Index of Refraction: " + material.ior);
+					break;
+				case MaterialType.Transparent:
+					debugInfo.Add("Color: " + material.color);
+					debugInfo.Add("Transparency: " + material.transparency);
+					break;
+			}
+
+			return debugInfo;
 		}
 	}
 }

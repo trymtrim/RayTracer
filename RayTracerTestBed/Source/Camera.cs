@@ -37,7 +37,7 @@ namespace RayTracerTestBed
 		private Vector3 Point(float x, float y)
 		{
 			Vector3 tempY = (upVector - direction * Vector3.Dot(direction, upVector)).Normalized();
-			Vector3 tempX = Vector3.Cross(-direction, tempY) * (GlobalOptions.ASPECT_RATIO_WIDTH / (float)GlobalOptions.ASPECT_RATIO_HEIGHT);
+			Vector3 tempX = Vector3.Cross(-direction, tempY) * (Config.ASPECT_RATIO_WIDTH / (float)Config.ASPECT_RATIO_HEIGHT);
 
 			float fovRad = fov * (float)Math.PI / 180.0f;
 
