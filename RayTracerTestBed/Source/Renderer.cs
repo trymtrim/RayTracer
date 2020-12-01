@@ -13,8 +13,6 @@ namespace RayTracerTestBed
 
 		public static void Render(Settings settings, Camera camera)
 		{
-			MathHelper.ResetSeed(); //Temp
-
 			Bitmap bitmap = new Bitmap(settings.width, settings.height);
 
 			Ray ray = new Ray();
@@ -34,9 +32,9 @@ namespace RayTracerTestBed
 						colorVector = Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor); //TODO: Move RayTracing methods to separate class
 					else
 					{
-						int samplePoints = 100;
+						int samplePoints = Config.PATH_TRACING_SAMPLES;
 
-						colorVector = PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor, new Vector2(vx, vy));
+						colorVector = PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 
 						for (int k = 1; k < samplePoints; k++)
 						{
@@ -50,7 +48,7 @@ namespace RayTracerTestBed
 
 							ray = camera.RayThroughScreen(x, y);
 
-							colorVector += PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor, new Vector2(x, y));
+							colorVector += PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 						}
 
 						colorVector /= samplePoints;
@@ -298,12 +296,12 @@ namespace RayTracerTestBed
 			return color;
 		}
 
-		private static Vector3 Reflect(Vector3 incidentDirection, Vector3 normal)
+		public static Vector3 Reflect(Vector3 incidentDirection, Vector3 normal)
 		{
 			return incidentDirection - 2.0f * Vector3.Dot(incidentDirection, normal) * normal;
 		}
 
-		private static Vector3 Refract(Vector3 incidentDirection, Vector3 normal, float ior)
+		public static Vector3 Refract(Vector3 incidentDirection, Vector3 normal, float ior)
 		{
 			float cosi = MathHelper.Clamp(Vector3.Dot(incidentDirection, normal), -1.0f, 1.0f);
 			float etai = 1.0f, etat = ior; //etai is the index of refraction of the medium the ray is in before entering the second medium
@@ -327,7 +325,7 @@ namespace RayTracerTestBed
 			return k < 0.0f ? new Vector3(0.0f) : eta * incidentDirection + (eta * cosi - (float)Math.Sqrt(k)) * n;
 		}
 
-		private static float Fresnel(Vector3 incidentDirection, Vector3 normal, float ior)
+		public static float Fresnel(Vector3 incidentDirection, Vector3 normal, float ior)
 		{
 			float kr;
 
