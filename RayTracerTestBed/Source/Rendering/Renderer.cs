@@ -7,9 +7,9 @@ namespace RayTracerTestBed
 {
 	class Renderer
 	{
-		public static Surface screen = new Surface();
-
 		public const float EPSILON = 0.0001f;
+
+		public static Surface screen = new Surface();
 
 		public static void Render(RenderSettings settings, Camera camera)
 		{
@@ -29,14 +29,14 @@ namespace RayTracerTestBed
 					ray = camera.RayThroughScreen(vx, vy);
 
 					if (settings.traceMethod == TraceMethod.WhittedRayTracing)
-						colorVector = RayTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor); //TODO: Move RayTracing methods to separate class
+						colorVector = RayTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 					else
 					{
-						int samplePoints = Config.PATH_TRACING_SAMPLES;
+						int sampleCount = Config.PATH_TRACING_SAMPLES;
 
 						colorVector = PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 
-						for (int k = 1; k < samplePoints; k++)
+						for (int k = 1; k < sampleCount; k++)
 						{
 							var offsetXMin = -(0.5f / settings.width);
 							var offsetXMax = (0.5f / settings.width);
@@ -51,7 +51,7 @@ namespace RayTracerTestBed
 							colorVector += PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 						}
 
-						colorVector /= samplePoints;
+						colorVector /= sampleCount;
 					}
 
 					if (settings.showUI)
