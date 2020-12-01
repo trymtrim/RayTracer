@@ -10,7 +10,7 @@ namespace RayTracerTestBed
 		private const float MOVEMENT_SPEED = 0.5f;
 		private const float ROTATION_SPEED = 1.0f;
 
-		public static Settings settings;
+		public static RenderSettings settings;
 
 		private static Camera _camera;
 
@@ -26,10 +26,10 @@ namespace RayTracerTestBed
 			settings.scene = new Scene(SceneType.Room);
 			settings.ui = new UserInterface(settings.width, settings.height);
 			settings.maxDepth = Config.MAX_DEPTH;
-			settings.backgroundColor = Vector3.Zero; new Vector3(0.235294f, 0.67451f, 0.843137f);
+			settings.backgroundColor = Vector3.Zero;
 			settings.traceMethod = Config.DEFAULT_TRACE_METHOD;
 			settings.showUI = true;
-			settings.antiAliasing = 4; //TODO: Implement anti-aliasing
+			//settings.antiAliasing = 4; //TODO: Implement anti-aliasing
 
 			//Initialize camera
 			Vector3 cameraOrigin = new Vector3(0.0f, 0.5f, -1.75f); //(0.0f, 0.0f, -2.0f)
@@ -124,7 +124,7 @@ namespace RayTracerTestBed
 			float x = (2.0f * (position.X + 0.5f) / settings.width - 1.0f) * imageAspectRatio * scale;
 			float y = (1.0f - 2.0f * (position.Y + 0.5f) / settings.height) * scale;
 
-			Renderer.NearestIntersection(settings.scene.meshes, new Ray(_camera.position, new Vector3(x, -y, 1.0f)), out float distance, out int? indexOfNearest);
+			RayTracer.NearestIntersection(settings.scene.meshes, new Ray(_camera.position, new Vector3(x, -y, 1.0f)), out float distance, out int? indexOfNearest);
 
 			if (indexOfNearest.HasValue)
 				SelectObject(indexOfNearest.Value);
