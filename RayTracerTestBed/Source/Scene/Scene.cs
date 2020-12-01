@@ -224,7 +224,8 @@ namespace RayTracerTestBed
 			//Floor
 			Mesh floor = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.0f, 0.0f), null, "Floor");
 			meshes.Add(floor);
-			Material planeMaterial = new ReflectionMaterial(Texture.Checkerboard, 1.0f, new Vector3(0.75f, 0.75f, 0.75f));
+			//new ReflectionMaterial(Texture.Checkerboard, 1.0f, new Vector3(0.75f, 0.75f, 0.75f));
+			Material planeMaterial = new DiffuseMaterial(Texture.Color, new Vector3(0.75f, 0.75f, 0.75f));
 			materials.Add(planeMaterial);
 
 			//Roof
