@@ -21,7 +21,7 @@ namespace RayTracerTestBed
 					var normal = light.mesh.Normal(intersection);
 
 					if (Vector3.Dot(normal, ray.direction) < 0.0f)
-						return light.color * light.emittance;
+						return light.color * light.brightness;
 					else
 						return Vector3.Zero; //Black
 				}
@@ -30,6 +30,7 @@ namespace RayTracerTestBed
 					if (depth <= 1)
 						return Vector3.Zero; //Black
 
+					Mesh mesh = scene.meshes[index];
 					Material material = scene.materials[index];
 
 					var reflection = material.reflection;
@@ -39,12 +40,7 @@ namespace RayTracerTestBed
 
 					var materialType = material.materialType;
 
-					Vector3 color;
-
-					if (material.texture == Texture.Checkerboard)
-						color = material.CheckerboardPattern(ray, distance);
-					else
-						color = material.color;
+					Vector3 color = material.Color(mesh, ray, distance, intersection);
 
 					var normal = scene.meshes[index].Normal(intersection);
 
@@ -68,6 +64,7 @@ namespace RayTracerTestBed
 								Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
 								result = reflection * reflectionColor;
 
+								result = color * result;
 								break;
 							}
 						case MaterialType.Refraction:
@@ -110,6 +107,7 @@ namespace RayTracerTestBed
 								Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
 								result = (reflectionColor * kr + refractionColor * (1.0f - kr)) * reflection;
 
+								result = color * result;
 								break;
 							}
 						case MaterialType.Transparent:
@@ -132,7 +130,7 @@ namespace RayTracerTestBed
 						result = Vector3.One * kr + result * (1.0f - kr);
 					}
 
-					return color * result;
+					return result; //TODO: Should this be multiplied with color? (Don't think so)
 				}
 			}
 

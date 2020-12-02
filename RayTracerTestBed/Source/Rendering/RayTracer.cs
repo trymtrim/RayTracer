@@ -13,17 +13,13 @@ namespace RayTracerTestBed
 			if (indexOfNearest.HasValue)
 			{
 				int index = indexOfNearest.Value;
-				var material = scene.materials[index];
-
-				Vector3 color;
-
-				if (material.texture == Texture.Checkerboard)
-					color = material.CheckerboardPattern(ray, distance);
-				else
-					color = material.color;
+				Material material = scene.materials[index];
+				Mesh mesh = scene.meshes[index];
 
 				var intersection = ray.At(distance);
-				var normal = scene.meshes[index].Normal(intersection);
+				var normal = mesh.Normal(intersection);
+
+				Vector3 color = material.Color(mesh, ray, distance, intersection);
 
 				var reflection = material.reflection;
 				var refraction = material.refraction;
@@ -124,8 +120,26 @@ namespace RayTracerTestBed
 				if (material.selected)
 				{
 					//Outline
-					float kr = Renderer.Fresnel(ray.direction, normal, 0.95f);
-					result = Vector3.One * kr + result * (1.0f - kr);
+					float outlineSize = 0.01f;
+
+					switch (mesh.shape)
+					{
+						case Shape.Plane:
+							{
+								if (mesh.TextureCoords(intersection).X < outlineSize || mesh.TextureCoords(intersection).X > 1.0f - outlineSize ||
+									mesh.TextureCoords(intersection).Y < outlineSize || mesh.TextureCoords(intersection).Y > 1.0f - outlineSize)
+									result = Vector3.One;
+
+								break;
+							}
+						case Shape.Sphere:
+							{
+								float kr = Renderer.Fresnel(ray.direction, normal, 0.95f);
+								result = Vector3.One * kr + result * (1.0f - kr);
+
+								break;
+							}
+					}
 				}
 
 				return result;
@@ -159,7 +173,7 @@ namespace RayTracerTestBed
 		private static Vector3 DirectIllumination(Scene scene, Vector3 point, Vector3 normal)
 		{
 			Vector3 color = Vector3.Zero;
-			float emittance = 1.0f;
+			float brightness = 1.0f;
 
 			foreach (var light in scene.lights)
 			{
@@ -182,7 +196,7 @@ namespace RayTracerTestBed
 						{
 							var directionFactor = Vector3.Dot(-dir, normal); //Photon smearing
 							color += light.color * directionFactor;
-							emittance = light.emittance;
+							brightness = light.brightness;
 						}
 					}
 				}
@@ -206,12 +220,12 @@ namespace RayTracerTestBed
 						var distanceDiv = (float)Math.Pow(distance, 2.0f);
 
 						color += light.color * light.mesh.Radius() * directionFactor / distanceDiv;
-						emittance = light.emittance;
+						brightness = light.brightness;
 					}
 				}
 			}
 
-			return color * emittance;
+			return color * brightness;
 		}
 	}
 }

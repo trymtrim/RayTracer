@@ -33,7 +33,7 @@ namespace RayTracerTestBed
 		//Initialization
 		public Surface()
 		{
-			_font = new Surface("../../assets/font.png");
+			_font = new Surface("../../Assets/Fonts/Font.png");
 		}
 
 		public void UpdateSurface(Bitmap bmp)

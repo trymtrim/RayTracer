@@ -14,12 +14,12 @@ namespace RayTracerTestBed
 		public Mesh mesh;
 		public Vector3? direction;
 		public Vector3 color;
-		public float emittance;
+		public float brightness;
 
-		public Light(LightType lightType, Vector3 color, float emittance, Vector3? center, float? radius, Vector3? direction = null, Vector3? on = null)
+		public Light(LightType lightType, Vector3 color, float brightness, Vector3? center, float? radius, Vector3? direction = null, Vector3? on = null)
 		{
 			this.color = color;
-			this.emittance = emittance;
+			this.brightness = brightness;
 
 			switch (lightType)
 			{
