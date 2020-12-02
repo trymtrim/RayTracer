@@ -14,5 +14,17 @@ namespace RayTracerTestBed
 
 			transparency = transparencyValue;
 		}
+
+		public TransparentMaterial(TextureType textureType, string texturePath, float transparencyValue)
+		{
+			materialType = MaterialType.Transparent;
+
+			this.textureType = textureType;
+
+			if (texturePath != null && texturePath != string.Empty)
+				AddTexture(texturePath);
+
+			transparency = transparencyValue;
+		}
 	}
 }

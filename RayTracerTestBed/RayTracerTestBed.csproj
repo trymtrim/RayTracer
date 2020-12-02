@@ -68,6 +68,7 @@
     <Compile Include="Source\Rendering\Renderer.cs" />
     <Compile Include="Source\Rendering\RenderSettings.cs" />
     <Compile Include="Source\Rendering\Surface.cs" />
+    <Compile Include="Source\Scene\Skybox.cs" />
     <Compile Include="Source\UI\Button.cs" />
     <Compile Include="Source\UI\UserInterface.cs" />
     <Compile Include="Source\UI\DebugUI.cs" />

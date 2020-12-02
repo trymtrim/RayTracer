@@ -65,22 +65,18 @@ namespace RayTracerTestBed
 			int x = (int)(textureCoords.X * textureWidth);
 			int y = (int)(textureCoords.Y * textureHeight);
 
-			//Console.WriteLine(textureWidth);
-
-			//TODO: Failsafe, this should maybe be done differently
+			//TODO: Failsafe, this should probably be done differently
 			if (x >= textureWidth)
 				x = textureWidth - 1;
 			if (y >= textureHeight)
 				y = textureHeight - 1;
-		
+
 			if (x < 0)
 				x = 0;
 			if (y < 0)
 				y = 0;
 
 			var colorFromTexture = texture.GetPixel(x, y);
-
-			//Console.WriteLine(colorFromTexture);
 
 			return new Vector3(colorFromTexture.R / 255.0f, colorFromTexture.G / 255.0f, colorFromTexture.B / 255.0f);
 		}

@@ -14,5 +14,17 @@ namespace RayTracerTestBed
 
 			reflection = reflectionValue;
 		}
+
+		public ReflectionMaterial(TextureType textureType, string texturePath, float reflectionValue)
+		{
+			materialType = MaterialType.Reflection;
+
+			this.textureType = textureType;
+
+			if (texturePath != null && texturePath != string.Empty)
+				AddTexture(texturePath);
+
+			reflection = reflectionValue;
+		}
 	}
 }

@@ -16,6 +16,8 @@ namespace RayTracerTestBed
 		public Shape shape;
 		protected int _index;
 
+		public bool isSkyboxMesh = false; //TODO: Change how this is handled
+
 		public void SetIndex()
 		{
 			_index = Scene.scene.meshes.Count;

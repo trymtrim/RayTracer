@@ -12,12 +12,11 @@ namespace RayTracerTestBed
 			this.color = color.HasValue ? color.Value : _defaultColor;
 		}
 
-		public DiffuseMaterial(TextureType textureType, string texturePath, Vector3? color = null)
+		public DiffuseMaterial(TextureType textureType, string texturePath)
 		{
 			materialType = MaterialType.Diffuse;
 
 			this.textureType = textureType;
-			this.color = color.HasValue ? color.Value : _defaultColor;
 
 			if (texturePath != null && texturePath != string.Empty)
 				AddTexture(texturePath);

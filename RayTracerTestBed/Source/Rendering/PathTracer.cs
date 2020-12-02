@@ -33,6 +33,9 @@ namespace RayTracerTestBed
 					Mesh mesh = scene.meshes[index];
 					Material material = scene.materials[index];
 
+					if (mesh.isSkyboxMesh)
+						return material.Color(mesh, ray, distance, intersection);
+
 					var reflection = material.reflection;
 					var refraction = material.refraction;
 					var ior = material.ior;
@@ -162,8 +165,6 @@ namespace RayTracerTestBed
 
 			for (int i = 0; i < lights.Count; i++)
 			{
-				//TODO: This might be worng - we wight want to check interaction by calculating distance instead of using mesh.Intersect
-
 				var intersection = lights[i].mesh.Intersect(ray);
 
 				if (intersection.HasValue)

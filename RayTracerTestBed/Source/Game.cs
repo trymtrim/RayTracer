@@ -32,7 +32,7 @@ namespace RayTracerTestBed
 			//settings.antiAliasing = 4; //TODO: Implement anti-aliasing
 
 			//Initialize camera
-			Vector3 cameraOrigin = new Vector3(0.0f, 0.5f, -1.75f); //(0.0f, 0.0f, -2.0f)
+			Vector3 cameraOrigin = new Vector3(0.0f, 0.5f, -1.75f); //new Vector3(0.0f, 0.0f, 0.0f); //(0.0f, 0.0f, -2.0f) //new Vector3(0.0f, 0.5f, -1.75f)
 			Vector3 cameraDirection = new Vector3(0.0f, 0.0f, 1.0f);
 			_camera = new Camera(Config.FOV, cameraOrigin, cameraDirection);
 
@@ -163,23 +163,23 @@ namespace RayTracerTestBed
 
 			switch (settings.scene.sceneType)
 			{
-				case SceneType.PointLight_VariousMaterials:
-					settings.scene = new Scene(SceneType.SpotLight_ReflectionMaterials);
+				case SceneType.Skybox:
+					settings.scene = new Scene(SceneType.SpotLight);
 					break;
-				case SceneType.SpotLight_ReflectionMaterials:
-					settings.scene = new Scene(SceneType.DirectionalLight_ReflectionRefraction);
+				case SceneType.SpotLight:
+					settings.scene = new Scene(SceneType.Photograph);
 					break;
-				case SceneType.DirectionalLight_ReflectionRefraction:
-					settings.scene = new Scene(SceneType.DirectionalLight_VariousMaterials);
+				case SceneType.Photograph:
+					settings.scene = new Scene(SceneType.Everything);
 					break;
-				case SceneType.DirectionalLight_VariousMaterials:
+				case SceneType.Everything:
 					settings.scene = new Scene(SceneType.Mirrors);
 					break;
 				case SceneType.Mirrors:
 					settings.scene = new Scene(SceneType.Room);
 					break;
 				case SceneType.Room:
-					settings.scene = new Scene(SceneType.PointLight_VariousMaterials);
+					settings.scene = new Scene(SceneType.Skybox);
 					break;
 			}
 		}
@@ -270,6 +270,10 @@ namespace RayTracerTestBed
 				DebugUI.Render(settings);
 				settings.ui.RenderText();
 			}
+
+			//TODO: Handle this
+			//if (settings.scene.skybox != null)
+			//	settings.scene.skybox.Update(_camera.position);
 		}
 	}
 }

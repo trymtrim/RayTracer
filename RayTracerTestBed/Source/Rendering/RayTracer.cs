@@ -41,6 +41,9 @@ namespace RayTracerTestBed
 					bool outside = Vector3.Dot(ray.direction, normal) < 0.0f;
 					Vector3 bias = Renderer.EPSILON * normal;
 
+					if (mesh.isSkyboxMesh)
+						return material.Color(mesh, ray, distance, intersection);
+
 					switch (material.materialType)
 					{
 						case MaterialType.Diffuse:
@@ -179,7 +182,7 @@ namespace RayTracerTestBed
 			{
 				if (light.direction.HasValue)
 				{
-					var dir = light.direction.Value; //REMINDER: This might be wrong
+					var dir = light.direction.Value;
 
 					var ray = new Ray(point - dir * Renderer.EPSILON, -dir);
 
