@@ -8,10 +8,15 @@ namespace RayTracerTestBed
 	{
 		public static Vector3 Trace(int depth, Scene scene, Ray ray, Vector3 backgroundColor)
 		{
-			NearestIntersection(scene.meshes, ray, out float distance, out int? indexOfNearest);
+			List<Mesh> meshes = scene.bvh.Traverse(ray);
+			NearestIntersection(meshes, ray, out float distance, out int? indexOfNearest);
+
+			//NearestIntersection(scene.meshes, ray, out float distance, out int? indexOfNearest);
 
 			if (indexOfNearest.HasValue)
 			{
+				Game.numRayIntersections++;
+
 				int index = indexOfNearest.Value;
 				Material material = scene.materials[index];
 				Mesh mesh = scene.meshes[index];
@@ -158,6 +163,8 @@ namespace RayTracerTestBed
 
 			for (int i = 0; i < meshes.Count; i++)
 			{
+				Game.numRayTests++;
+
 				var intersection = meshes[i].Intersect(ray);
 
 				if (intersection.HasValue)

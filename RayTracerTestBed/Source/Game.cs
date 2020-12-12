@@ -8,15 +8,21 @@ namespace RayTracerTestBed
 	class Game
 	{
 		private const float MOVEMENT_SPEED = 0.5f;
-		private const float ROTATION_SPEED = 1.0f;
+		private const float ROTATION_SPEED = 0.5f;
 
 		public static RenderSettings settings;
 
 		private static Camera _camera;
 
-		private float angle = 0.0f;
+		private float _angle = 0.0f;
 
-		private Stopwatch stopwatch = new Stopwatch();
+		private Stopwatch _stopwatch = new Stopwatch();
+
+		//Stats
+		public static Stopwatch renderTimeStopwatch = new Stopwatch();
+		public static int numPrimaryRays = 0;
+		public static int numRayTests = 0;
+		public static int numRayIntersections = 0;
 
 		public void Init()
 		{
@@ -32,12 +38,15 @@ namespace RayTracerTestBed
 			//settings.antiAliasing = 4; //TODO: Implement anti-aliasing
 
 			//Initialize camera
-			Vector3 cameraOrigin = new Vector3(0.0f, 0.5f, -1.75f); //new Vector3(0.0f, 0.0f, 0.0f); //(0.0f, 0.0f, -2.0f) //new Vector3(0.0f, 0.5f, -1.75f)
+			Vector3 cameraPosition = new Vector3(0.0f, 0.5f, -1.75f); //new Vector3(0.0f, 0.0f, 0.0f); //(0.0f, 0.0f, -2.0f) //new Vector3(0.0f, 0.5f, -1.75f)
 			Vector3 cameraDirection = new Vector3(0.0f, 0.0f, 1.0f);
-			_camera = new Camera(Config.FOV, cameraOrigin, cameraDirection);
+			_camera = new Camera(Config.FOV, cameraPosition, cameraDirection);
 
 			//Initialize debug window
 			DebugUI.Initialize();
+
+			//Start render frame stopwatch
+			renderTimeStopwatch.Start();
 		}
 
 		public void Tick()
@@ -66,19 +75,19 @@ namespace RayTracerTestBed
 
 			if (keyboard[OpenTK.Input.Key.Z])
 			{
-				if (stopwatch.IsRunning)
+				if (_stopwatch.IsRunning)
 				{
-					if (stopwatch.Elapsed.TotalMilliseconds > 1000)
+					if (_stopwatch.Elapsed.TotalMilliseconds > 1000)
 					{
 						Console.WriteLine("Toggle");
 						ToggleUI();
-						stopwatch.Restart();
+						_stopwatch.Restart();
 					}
 				}
 				else
 				{
 					ToggleUI();
-					stopwatch.Start();
+					_stopwatch.Start();
 
 					Console.WriteLine("Toggle First");
 				}
@@ -236,24 +245,24 @@ namespace RayTracerTestBed
 
 		private void RotateLeft()
 		{
-			angle += ROTATION_SPEED;
+			_angle += ROTATION_SPEED;
 
 			var v = _camera.direction;
 			_camera.direction = new Vector3(
-				v.X * (float)Math.Cos(angle) + v.Z * (float)Math.Sin(angle),
+				v.X * (float)Math.Cos(_angle) + v.Z * (float)Math.Sin(_angle),
 				v.Y,
-				-v.X * (float)Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
+				-v.X * (float)Math.Sin(_angle) + v.Z * (float)Math.Cos(_angle));
 		}
 
 		private void RotateRight()
 		{
-			angle -= ROTATION_SPEED;
+			_angle -= ROTATION_SPEED;
 
 			var v = _camera.direction;
 			_camera.direction = new Vector3(
-				v.X * (float)Math.Cos(angle) + v.Z * (float)Math.Sin(angle),
+				v.X * (float)Math.Cos(_angle) + v.Z * (float)Math.Sin(_angle),
 				v.Y,
-				-v.X * (float)Math.Sin(angle) + v.Z * (float)Math.Cos(angle));
+				-v.X * (float)Math.Sin(_angle) + v.Z * (float)Math.Cos(_angle));
 		}
 
 		private void ToggleUI()
@@ -263,7 +272,13 @@ namespace RayTracerTestBed
 
 		public void Render()
 		{
+			renderTimeStopwatch.Restart();
+
 			Renderer.Render(settings, _camera);
+
+			PrintStats();
+
+			//BVH: Render bounding boxes in scene as lines
 
 			if (settings.showUI)
 			{
@@ -274,6 +289,21 @@ namespace RayTracerTestBed
 			//TODO: Handle this
 			//if (settings.scene.skybox != null)
 			//	settings.scene.skybox.Update(_camera.position);
+		}
+
+		private void PrintStats()
+		{
+			double renderTime = renderTimeStopwatch.Elapsed.TotalMilliseconds / 1000.0f;
+
+			Console.WriteLine("--------------------");
+			Console.WriteLine("Render time: " + renderTime);
+			Console.WriteLine("Primary rays: " + numPrimaryRays);
+			Console.WriteLine("Ray tests: " + numRayTests);
+			Console.WriteLine("Ray intersections: " + numRayIntersections);
+
+			numPrimaryRays = 0;
+			numRayTests = 0;
+			numRayIntersections = 0;
 		}
 	}
 }

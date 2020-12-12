@@ -11,6 +11,8 @@ namespace RayTracerTestBed
 
 			if (indexOfNearest.HasValue)
 			{
+				Game.numRayIntersections++;
+
 				int index = indexOfNearest.Value;
 				var intersection = ray.At(distance);
 
@@ -148,6 +150,8 @@ namespace RayTracerTestBed
 
 			for (int i = 0; i < meshes.Count; i++)
 			{
+				Game.numRayTests++;
+
 				var intersection = meshes[i].Intersect(ray);
 
 				if (intersection.HasValue)
@@ -165,6 +169,8 @@ namespace RayTracerTestBed
 
 			for (int i = 0; i < lights.Count; i++)
 			{
+				Game.numRayTests++;
+
 				var intersection = lights[i].mesh.Intersect(ray);
 
 				if (intersection.HasValue)

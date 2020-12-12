@@ -20,6 +20,8 @@ namespace RayTracerTestBed
 
 		public Skybox skybox;
 
+		public BVH bvh;
+
 		public List<Mesh> meshes = new List<Mesh>();
 		public List<Material> materials = new List<Material>(); //Meshes and materials with the same index correspond to each other
 		public List<Light> lights = new List<Light>();
@@ -53,6 +55,8 @@ namespace RayTracerTestBed
 					SpawnMap6();
 					break;
 			}
+
+			bvh = new BVH(meshes);
 		}
 
 		private void SpawnMap1()
@@ -164,14 +168,14 @@ namespace RayTracerTestBed
 			Material backWallMaterial = new DiffuseMaterial(TextureType.Color, new Vector3(0.75f, 0.75f, 0.75f));
 			materials.Add(backWallMaterial);
 
-			//Mirror
-			Mesh mirror = new Plane(new Vector3(0.0f, 0.0f, -1.0f), new Vector3(0.0f, 0.0f, -4.19f), new Vector3(2.0f, 1.0f, 2.0f * 1.26666f), "Mirror");
+			//Photograph
+			Mesh mirror = new Plane(new Vector3(0.0f, 0.0f, -1.0f), new Vector3(0.0f, 0.0f, -4.19f), new Vector3(2.0f, 1.0f, 2.0f * 1.26666f), "Photograph");
 			meshes.Add(mirror);
 			Material mirrorMaterial = new DiffuseMaterial(TextureType.Texture, "../../Assets/Textures/AilinTrym.png");
 			materials.Add(mirrorMaterial);
 
-			//Mirror ball
-			Mesh sphere1 = new Sphere(new Vector3(-0.9f, 1.35f, 2.0f), 0.65f, "Mirror Ball");
+			//Ball
+			Mesh sphere1 = new Sphere(new Vector3(-0.9f, 1.35f, 2.0f), 0.65f, "Ball");
 			meshes.Add(sphere1);
 			Material sphere1Material = new DiffuseMaterial(TextureType.Texture, "../../Assets/Textures/test.png");
 			materials.Add(sphere1Material);
@@ -185,43 +189,48 @@ namespace RayTracerTestBed
 
 		private void SpawnMap4()
 		{
-			//TODO: Implement this - everything should be in here
-
 			//Skybox
 			skybox = new Skybox(scene);
 
-			//Floor plane
-			Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.5f, 4.0f), new Vector3(6.0f), "Floor");
-			meshes.Add(plane);
-			Material planeMaterial = new DiffuseMaterial(TextureType.Checkerboard, new Vector3(1, 0, 0));
-			materials.Add(planeMaterial);
-			skybox = null;
-
-			////Floor plane
-			//Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.0f, 0.0f), new Vector3(10.0f, 10.0f, 10.0f), "Floor");
-			//meshes.Add(plane);
-			//Material planeMaterial = new ReflectionMaterial(TextureType.Checkerboard, 0.9f, new Vector3(1,0,0));
-			//materials.Add(planeMaterial);
-
+			//Directional light
 			Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f), 2.4f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
 			lights.Add(light);
 
-			////Floor plane at y=3
-			//Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), -3.0f, "Floor");
-			//meshes.Add(plane);
-			//Material planeMaterial = new Material(Texture.Checkerboard, new Vector3(0.937f, 0.937f, 0.231f));
-			//planeMaterial.checkerboardSecondColor = new Vector3(0.815f, 0.235f, 0.031f);
-			//materials.Add(planeMaterial);
+			Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.5f, 8.0f), new Vector3(10.0f), "Floor");
+			meshes.Add(plane);
+			Material planeMaterial = new ReflectionMaterial(TextureType.Checkerboard, 0.9f, new Vector3(0, 1, 0));
+			materials.Add(planeMaterial);
+			skybox = null;
 
-			//Mesh sphere1 = new Sphere(new Vector3(-1.0f, 0.0f, 12.0f), 2.0f, "Sphere1");
-			//meshes.Add(sphere1);
-			//Material sphere1Material = new Material(Texture.Color, new Vector3(0.6f, 0.7f, 0.8f));
-			//materials.Add(sphere1Material);
+			Mesh sphere1 = new Sphere(new Vector3(-4.0f, 1.5f, 6.0f), 1.0f, "Sphere1");
+			meshes.Add(sphere1);
+			Material sphere1Material = new RefractionMaterial(TextureType.Color, 1.02f, 0.98f);
+			materials.Add(sphere1Material);
 
-			//Mesh sphere2 = new Sphere(new Vector3(0.5f, 0.5f, 8.0f), 1.5f, "Sphere2");
-			//meshes.Add(sphere2);
-			//Material sphere2Material = new Material(Texture.Color, new Vector3(0.0f, 0.0f, 0.0f), 0.8f, 1.3f);
-			//materials.Add(sphere2Material);
+			Mesh sphere2 = new Sphere(new Vector3(1.0f, -2.0f, 9.0f), 2.0f, "Sphere2");
+			meshes.Add(sphere2);
+			Material sphere2Material = new TransparentMaterial(TextureType.Color, 0.8f, new Vector3(0.8f, 0.2f, 0.2f));
+			materials.Add(sphere2Material);
+
+			Mesh sphere3 = new Sphere(new Vector3(-2.0f, 1.0f, 11.0f), 1.5f, "Sphere3");
+			meshes.Add(sphere3);
+			Material sphere3Material = new ReflectionMaterial(TextureType.Color, 0.98f);
+			materials.Add(sphere3Material);
+
+			Mesh sphere4 = new Sphere(new Vector3(3.0f, 1.2f, 6.0f), 1.5f, "Sphere4");
+			meshes.Add(sphere4);
+			Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			materials.Add(sphere4Material);
+
+			Mesh sphere5 = new Sphere(new Vector3(1.0f, 1.5f, 11.0f), 1.0f, "Sphere5");
+			meshes.Add(sphere5);
+			Material sphere5Material = new DiffuseMaterial(TextureType.Texture, "../../Assets/Textures/test.png");
+			materials.Add(sphere5Material);
+
+			Mesh sphere6 = new Sphere(new Vector3(-1.0f, 2.0f, 5.0f), 0.5f, "Sphere6");
+			meshes.Add(sphere6);
+			Material sphere6Material = new ReflectionRefractionMaterial(TextureType.Color, 1.5f, 0.98f);
+			materials.Add(sphere6Material);
 		}
 
 		private void SpawnMap5()
@@ -274,8 +283,8 @@ namespace RayTracerTestBed
 			Material sphere1Material = new ReflectionMaterial(TextureType.Color, 0.98f);
 			materials.Add(sphere1Material);
 
-			//Glass ball
-			Mesh sphere2 = new Sphere(new Vector3(1.0f, 1.35f, 2.25f), 0.65f, "Glass Ball");
+			//Mirror ball
+			Mesh sphere2 = new Sphere(new Vector3(1.0f, 1.35f, 2.25f), 0.65f, "Mirror Ball 2");
 			meshes.Add(sphere2);
 			Material sphere2Material = new ReflectionMaterial(TextureType.Color, 0.98f);
 			materials.Add(sphere2Material);
@@ -292,7 +301,6 @@ namespace RayTracerTestBed
 			//Floor
 			Mesh floor = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.0f, 0.0f), null, "Floor");
 			meshes.Add(floor);
-			//Material planeMaterial = new ReflectionMaterial(Texture.Checkerboard, 1.0f, new Vector3(0.75f, 0.75f, 0.75f));
 			Material planeMaterial = new DiffuseMaterial(TextureType.Color, new Vector3(0.75f, 0.75f, 0.75f));
 			materials.Add(planeMaterial);
 

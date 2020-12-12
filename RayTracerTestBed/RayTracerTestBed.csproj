@@ -47,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Source\Rendering\RayTracer.cs" />
+    <Compile Include="Source\Scene\BVH\AABB.cs" />
+    <Compile Include="Source\Scene\BVH\BVHNode.cs" />
+    <Compile Include="Source\Scene\BVH\BVH.cs" />
     <Compile Include="Source\Scene\Camera.cs" />
     <Compile Include="Source\Game.cs" />
     <Compile Include="Source\Config.cs" />

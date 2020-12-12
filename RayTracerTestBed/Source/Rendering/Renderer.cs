@@ -27,16 +27,21 @@ namespace RayTracerTestBed
 
 					ray = camera.RayThroughScreen(vx, vy);
 
+					Game.numPrimaryRays++;
+
 					if (settings.traceMethod == TraceMethod.WhittedRayTracing)
 						colorVector = RayTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 					else
 					{
 						int sampleCount = Config.PATH_TRACING_SAMPLES;
 
+						//TODO: Unsure if this should be here or if I should start random sampling loop from 0 instead of 1
 						colorVector = PathTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 
 						for (int k = 1; k < sampleCount; k++)
 						{
+							Game.numPrimaryRays++;
+
 							var offsetXMin = -(0.5f / settings.width);
 							var offsetXMax = (0.5f / settings.width);
 							var offsetYMin = -(0.5f / settings.height);
@@ -148,8 +153,6 @@ namespace RayTracerTestBed
 				float rp = ((etaI * cosI) - (etaT * cosT)) / ((etaI * cosI) + (etaT * cosT));
 				kr = (rs * rs + rp * rp) / 2.0f;
 			}
-
-			//As a consequence of the conservation of energy, transmittance is given by: kt = 1 - kr;
 
 			return kr;
 		}
