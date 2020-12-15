@@ -10,5 +10,7 @@ namespace RayTracerTestBed
 		public const int PATH_TRACING_SAMPLES = 8;
 
 		public const TraceMethod DEFAULT_TRACE_METHOD = TraceMethod.WhittedRayTracing;
+
+		public const bool USE_BVH = true;
 	}
 }

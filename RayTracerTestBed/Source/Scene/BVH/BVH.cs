@@ -10,17 +10,22 @@ namespace RayTracerTestBed
 	{
 		private BVHNode root;
 
+		public static List<Mesh> Meshes;
+
 		public BVH(List<Mesh> meshes)
 		{
-			//Construct BVH
+			Meshes = meshes;
 
-			//TODO: Construct BVH
-			//Lecture 5 slides: the perfect BVH - SAH
+			//Build the BVH
+			List<int> meshIndices = new List<int>();
 
-			root = new BVHNode(meshes, 0); //Temp
+			for (int i = 0; i < meshes.Count; i++)
+				meshIndices.Add(i);
+
+			root = new BVHNode(meshIndices);
 		}
 
-		public List<Mesh> Traverse(Ray ray)
+		public List<int> Traverse(Ray ray)
 		{
 			return root.Traverse(ray);
 		}

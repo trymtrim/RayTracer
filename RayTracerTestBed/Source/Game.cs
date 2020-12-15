@@ -32,7 +32,7 @@ namespace RayTracerTestBed
 			settings.ui = new UserInterface(settings.width, settings.height);
 			settings.maxDepth = Config.MAX_DEPTH;
 			settings.backgroundColor = Vector3.Zero;
-			settings.scene = new Scene(SceneType.Room);
+			settings.scene = new Scene(SceneType.Everything);
 			settings.traceMethod = Config.DEFAULT_TRACE_METHOD;
 			settings.showUI = true;
 			//settings.antiAliasing = 4; //TODO: Implement anti-aliasing
@@ -278,7 +278,7 @@ namespace RayTracerTestBed
 
 			PrintStats();
 
-			//BVH: Render bounding boxes in scene as lines
+			//TODO: Render bounding boxes in scene as lines (?)
 
 			if (settings.showUI)
 			{

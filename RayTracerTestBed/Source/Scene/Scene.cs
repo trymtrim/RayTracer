@@ -56,7 +56,8 @@ namespace RayTracerTestBed
 					break;
 			}
 
-			bvh = new BVH(meshes);
+			if (Config.USE_BVH)
+				bvh = new BVH(meshes);
 		}
 
 		private void SpawnMap1()
@@ -190,47 +191,61 @@ namespace RayTracerTestBed
 		private void SpawnMap4()
 		{
 			//Skybox
-			skybox = new Skybox(scene);
+			//skybox = new Skybox(scene);
 
 			//Directional light
 			Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f), 2.4f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
 			lights.Add(light);
 
-			Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.5f, 8.0f), new Vector3(10.0f), "Floor");
-			meshes.Add(plane);
-			Material planeMaterial = new ReflectionMaterial(TextureType.Checkerboard, 0.9f, new Vector3(0, 1, 0));
-			materials.Add(planeMaterial);
-			skybox = null;
+			//Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.5f, 8.0f), new Vector3(10.0f), "Floor");
+			//meshes.Add(plane);
+			//Material planeMaterial = new ReflectionMaterial(TextureType.Checkerboard, 0.9f, new Vector3(0, 1, 0));
+			//materials.Add(planeMaterial);
+			//skybox = null;
 
-			Mesh sphere1 = new Sphere(new Vector3(-4.0f, 1.5f, 6.0f), 1.0f, "Sphere1");
-			meshes.Add(sphere1);
-			Material sphere1Material = new RefractionMaterial(TextureType.Color, 1.02f, 0.98f);
-			materials.Add(sphere1Material);
+			//Mesh sphere1 = new Sphere(new Vector3(-4.0f, 1.5f, 6.0f), 1.0f, "Sphere1");
+			//meshes.Add(sphere1);
+			//Material sphere1Material = new RefractionMaterial(TextureType.Color, 1.02f, 0.98f);
+			//materials.Add(sphere1Material);
 
-			Mesh sphere2 = new Sphere(new Vector3(1.0f, -2.0f, 9.0f), 2.0f, "Sphere2");
-			meshes.Add(sphere2);
-			Material sphere2Material = new TransparentMaterial(TextureType.Color, 0.8f, new Vector3(0.8f, 0.2f, 0.2f));
-			materials.Add(sphere2Material);
+			//Mesh sphere2 = new Sphere(new Vector3(1.0f, -2.0f, 9.0f), 2.0f, "Sphere2");
+			//meshes.Add(sphere2);
+			//Material sphere2Material = new TransparentMaterial(TextureType.Color, 0.8f, new Vector3(0.8f, 0.2f, 0.2f));
+			//materials.Add(sphere2Material);
 
-			Mesh sphere3 = new Sphere(new Vector3(-2.0f, 1.0f, 11.0f), 1.5f, "Sphere3");
-			meshes.Add(sphere3);
-			Material sphere3Material = new ReflectionMaterial(TextureType.Color, 0.98f);
-			materials.Add(sphere3Material);
+			//Mesh sphere3 = new Sphere(new Vector3(-2.0f, 1.0f, 11.0f), 1.5f, "Sphere3");
+			//meshes.Add(sphere3);
+			//Material sphere3Material = new ReflectionMaterial(TextureType.Color, 0.98f);
+			//materials.Add(sphere3Material);
 
-			Mesh sphere4 = new Sphere(new Vector3(3.0f, 1.2f, 6.0f), 1.5f, "Sphere4");
-			meshes.Add(sphere4);
-			Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-			materials.Add(sphere4Material);
+			//Mesh sphere4 = new Sphere(new Vector3(3.0f, 1.2f, 6.0f), 1.5f, "Sphere4");
+			//meshes.Add(sphere4);
+			//Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			//materials.Add(sphere4Material);
 
-			Mesh sphere5 = new Sphere(new Vector3(1.0f, 1.5f, 11.0f), 1.0f, "Sphere5");
-			meshes.Add(sphere5);
-			Material sphere5Material = new DiffuseMaterial(TextureType.Texture, "../../Assets/Textures/test.png");
-			materials.Add(sphere5Material);
+			//Mesh sphere5 = new Sphere(new Vector3(1.0f, 1.5f, 11.0f), 1.0f, "Sphere5");
+			//meshes.Add(sphere5);
+			//Material sphere5Material = new DiffuseMaterial(TextureType.Texture, "../../Assets/Textures/test.png");
+			//materials.Add(sphere5Material);
 
-			Mesh sphere6 = new Sphere(new Vector3(-1.0f, 2.0f, 5.0f), 0.5f, "Sphere6");
-			meshes.Add(sphere6);
-			Material sphere6Material = new ReflectionRefractionMaterial(TextureType.Color, 1.5f, 0.98f);
-			materials.Add(sphere6Material);
+			//Mesh sphere6 = new Sphere(new Vector3(-1.0f, 2.0f, 5.0f), 0.5f, "Sphere6");
+			//meshes.Add(sphere6);
+			//Material sphere6Material = new ReflectionRefractionMaterial(TextureType.Color, 1.5f, 0.98f);
+			//materials.Add(sphere6Material);
+
+			int width = 20;
+			int height = 20;
+
+			for (int i = -width/2; i < width/2; i++)
+			{
+				for (int j = -height/2; j < height/2; j++)
+				{
+					Mesh sphere4 = new Sphere(new Vector3(i / 2.0f, j / 2.0f, 6.0f), 0.25f, "Sphere4");
+					meshes.Add(sphere4);
+					Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+					materials.Add(sphere4Material);
+				}
+			}
 		}
 
 		private void SpawnMap5()
