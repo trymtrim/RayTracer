@@ -233,8 +233,8 @@ namespace RayTracerTestBed
 			//Material sphere6Material = new ReflectionRefractionMaterial(TextureType.Color, 1.5f, 0.98f);
 			//materials.Add(sphere6Material);
 
-			int width = 20;
-			int height = 20;
+			int width = 50;
+			int height = 4;
 
 			for (int i = -width/2; i < width/2; i++)
 			{

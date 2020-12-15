@@ -27,8 +27,6 @@ namespace RayTracerTestBed
 
 					ray = camera.RayThroughScreen(vx, vy);
 
-					Game.numPrimaryRays++;
-
 					if (settings.traceMethod == TraceMethod.WhittedRayTracing)
 						colorVector = RayTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
 					else
@@ -40,8 +38,6 @@ namespace RayTracerTestBed
 
 						for (int k = 1; k < sampleCount; k++)
 						{
-							Game.numPrimaryRays++;
-
 							var offsetXMin = -(0.5f / settings.width);
 							var offsetXMax = (0.5f / settings.width);
 							var offsetYMin = -(0.5f / settings.height);

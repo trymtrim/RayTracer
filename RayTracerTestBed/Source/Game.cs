@@ -298,7 +298,7 @@ namespace RayTracerTestBed
 			Console.WriteLine("--------------------");
 			Console.WriteLine("Render time: " + renderTime);
 			Console.WriteLine("Primary rays: " + numPrimaryRays);
-			Console.WriteLine("Ray tests: " + numRayTests);
+			Console.WriteLine("Intersection tests: " + numRayTests);
 			Console.WriteLine("Ray intersections: " + numRayIntersections);
 
 			numPrimaryRays = 0;
