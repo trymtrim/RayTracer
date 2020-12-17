@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 
 namespace RayTracerTestBed
@@ -16,11 +13,11 @@ namespace RayTracerTestBed
 		public List<int> meshIndices;
 		//public List<Mesh> meshes; //Consider changing this to "int first, count;" instead?
 
-		public BVHNode(List<int> meshIndices)
+		public BVHNode(List<int> meshIndices, List<Mesh> allMeshes)
 		{
 			this.meshIndices = meshIndices;
 
-			bounds = ConstructBoundingBox(meshIndices);
+			bounds = ConstructBoundingBox(meshIndices, allMeshes);
 
 			//Subdivide
 			List<int> leftSide = new List<int>();
@@ -40,7 +37,7 @@ namespace RayTracerTestBed
 				for (int j = 0; j < splitBins; j++)
 				{
 					float splitInterval = j * (binSize);
-					float splitCost = SplitCost(i, splitInterval, out List<int> leftSideMeshes, out List<int> rightSideMeshes);
+					float splitCost = SplitCost(i, splitInterval, allMeshes, out List<int> leftSideMeshes, out List<int> rightSideMeshes);
 
 					if (splitCost < minimalSplitCost)
 					{
@@ -52,26 +49,30 @@ namespace RayTracerTestBed
 				}
 			}
 
+			//Console.WriteLine(meshIndices.Count); //Debug
+
 			if (meshIndices.Count == 1 || minimalSplitCost >= bounds.SurfaceArea() * meshIndices.Count)
 			{
+				//Debug
+				//if (meshIndices.Count > 1)
+				//	Console.WriteLine(">1 mesh");
+
 				isLeaf = true;
 				return;
 			}
 
-			Console.WriteLine(meshIndices.Count);
-
-			leftChildNode = new BVHNode(leftSide);
-			rightChildNode = new BVHNode(rightSide);
+			leftChildNode = new BVHNode(leftSide, allMeshes);
+			rightChildNode = new BVHNode(rightSide, allMeshes);
 		}
 
-		private float SplitCost(int splitAxis, float splitInterval, out List<int> leftSide, out List<int> rightSide)
+		private float SplitCost(int splitAxis, float splitInterval, List<Mesh> allMeshes, out List<int> leftSide, out List<int> rightSide)
 		{
 			leftSide = new List<int>();
 			rightSide = new List<int>();
 
 			for (int i = 0; i < meshIndices.Count; i++)
 			{
-				Mesh mesh = BVH.Meshes[meshIndices[i]];
+				Mesh mesh = allMeshes[meshIndices[i]];
 
 				switch (splitAxis)
 				{
@@ -113,15 +114,15 @@ namespace RayTracerTestBed
 
 			//TODO: These constructed bounding boxes can be passed on, instead of creating new ones when allocating child nodes
 
-			float aLeft = ConstructBoundingBox(leftSide).SurfaceArea();
+			float aLeft = ConstructBoundingBox(leftSide, allMeshes).SurfaceArea();
 			float nLeft = leftSide.Count;
-			float aRight = ConstructBoundingBox(rightSide).SurfaceArea();
+			float aRight = ConstructBoundingBox(rightSide, allMeshes).SurfaceArea();
 			float nRight = rightSide.Count;
 
 			return aLeft * nLeft + aRight * nRight;
 		}
 
-		private AABB ConstructBoundingBox(List<int> meshIndices)
+		private AABB ConstructBoundingBox(List<int> meshIndices, List<Mesh> allMeshes)
 		{
 			//TODO: This only works for spheres right now, make it work for planes too?
 
@@ -130,7 +131,7 @@ namespace RayTracerTestBed
 
 			for (int i = 0; i < meshIndices.Count; i++)
 			{
-				Mesh mesh = BVH.Meshes[meshIndices[i]];
+				Mesh mesh = allMeshes[meshIndices[i]];
 
 				float xMax = mesh.Center().X + mesh.Radius();
 				if (xMax > maxBounds.X)
@@ -203,24 +204,15 @@ namespace RayTracerTestBed
 
 			if (isLeaf)
 			{
-				List<int> meshes = new List<int>();
-
-				for (int i = 0; i < meshIndices.Count; i++)
-					meshes.Add(meshIndices[i]);
-
-				return meshes;
+				return meshIndices;
 			}
 			else
 			{
-				//TODO: Consider stopping after finding a box where the ray is intersecting with a mesh instead of adding everything to the mesh list before returning
+				//TODO: Stop after finding a box where the ray is intersecting with a mesh instead of adding everything to the mesh list before returning
 				//Ordered traversal, option 1 (slide 39):
 				//- Calculate distance to both child nodes
 				//- Traverse the nearest child node first
 				//- If the ray intersects with anything, don't traverse the second child node
-				//(Look at "the perfect BVH" lecture slides first, we might not want to do any of the above, depending on how the SAH works)
-				//Also consider rewatching lecture or lab recording
-
-				//return meshes;
 
 				List<int> meshesInNode = new List<int>();
 

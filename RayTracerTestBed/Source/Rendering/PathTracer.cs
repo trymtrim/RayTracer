@@ -7,7 +7,37 @@ namespace RayTracerTestBed
 	{
 		public static Vector3 Trace(int depth, Scene scene, Ray ray, Vector3 backgroundColor)
 		{
-			NearestIntersectionIncludingLights(scene.meshes, scene.lights, ray, out float distance, out int? indexOfNearest, out bool isLight);
+			float distance = 0.0f;
+			int? indexOfNearest = null;
+			bool isLight = false;
+
+			if (Config.USE_BVH)
+			{
+				List<int> meshIndices = scene.bvh.Traverse(ray);
+
+				if (meshIndices.Count > 0)
+				{
+					List<Mesh> meshes = new List<Mesh>();
+
+					for (int i = 0; i < meshIndices.Count; i++)
+						meshes.Add(scene.meshes[meshIndices[i]]);
+
+					NearestIntersectionIncludingLights(meshes, scene.lights, ray, out distance, out indexOfNearest, out isLight);
+
+					if (!isLight && indexOfNearest.HasValue)
+						indexOfNearest = meshIndices[indexOfNearest.Value];
+
+					if (depth == Game.settings.maxDepth)
+						Game.numPrimaryRays++;
+				}
+			}
+			else
+			{
+				NearestIntersectionIncludingLights(scene.meshes, scene.lights, ray, out distance, out indexOfNearest, out isLight);
+
+				if (depth == Game.settings.maxDepth)
+					Game.numPrimaryRays++;
+			}
 
 			if (indexOfNearest.HasValue)
 			{
@@ -135,7 +165,7 @@ namespace RayTracerTestBed
 						result = Vector3.One * kr + result * (1.0f - kr);
 					}
 
-					return result; //TODO: Should this be multiplied with color? (Don't think so)
+					return result;
 				}
 			}
 

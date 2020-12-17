@@ -296,7 +296,8 @@ namespace RayTracerTestBed
 			double renderTime = renderTimeStopwatch.Elapsed.TotalMilliseconds / 1000.0f;
 
 			Console.WriteLine("--------------------");
-			Console.WriteLine("Render time: " + renderTime);
+			Console.WriteLine("Primitives: " + settings.scene.meshes.Count);
+			Console.WriteLine("Render time: " + renderTime + "\n");
 			Console.WriteLine("Primary rays: " + numPrimaryRays);
 			Console.WriteLine("Intersection tests: " + numRayTests);
 			Console.WriteLine("Ray intersections: " + numRayIntersections);

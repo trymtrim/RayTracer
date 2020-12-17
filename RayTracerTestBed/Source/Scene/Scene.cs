@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using OpenTK;
 
 namespace RayTracerTestBed
@@ -30,6 +31,9 @@ namespace RayTracerTestBed
 
 		public Scene(SceneType sceneType)
 		{
+			Stopwatch stopwatch = new Stopwatch();
+			stopwatch.Start();
+
 			scene = this;
 
 			this.sceneType = sceneType;
@@ -58,6 +62,11 @@ namespace RayTracerTestBed
 
 			if (Config.USE_BVH)
 				bvh = new BVH(meshes);
+
+			stopwatch.Stop();
+
+			if (Config.USE_BVH)
+				Console.WriteLine("BVH Construction: " + stopwatch.Elapsed.TotalMilliseconds / 1000.0f + " sec");
 		}
 
 		private void SpawnMap1()
@@ -233,29 +242,42 @@ namespace RayTracerTestBed
 			//Material sphere6Material = new ReflectionRefractionMaterial(TextureType.Color, 1.5f, 0.98f);
 			//materials.Add(sphere6Material);
 
-			int width = 50;
-			int height = 4;
+			//int width = 50;
+			//int height = 4;
 
-			for (int i = -width / 2; i < width / 2; i++)
-			{
-				for (int j = -height / 2; j < height / 2; j++)
-				{
-					Mesh sphere4 = new Sphere(new Vector3(i / 2.0f, j / 2.0f, 6.0f), 0.25f, "Sphere4");
-					meshes.Add(sphere4);
-					Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-					materials.Add(sphere4Material);
-				}
-			}
-
-			//int meshCount = 100;
-
-			//for (int i = 0; i < meshCount; i++)
+			//for (int i = -width / 2; i < width / 2; i++)
 			//{
-			//	Mesh sphere4 = new Sphere(new Vector3(, i / 2.0f, 6.0f), 0.25f, "Sphere4");
-			//	meshes.Add(sphere4);
-			//	Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-			//	materials.Add(sphere4Material);
+			//	for (int j = -height / 2; j < height / 2; j++)
+			//	{
+			//		Mesh sphere4 = new Sphere(new Vector3(i / 2.0f, j / 2.0f, 6.0f), 0.25f, "Sphere4");
+			//		meshes.Add(sphere4);
+			//		Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			//		materials.Add(sphere4Material);
+			//	}
 			//}
+
+			int meshCount = 100;
+
+			float min = -12.0f;
+			float max = 12.0f;
+
+			float xMin = min;
+			float xMax = max;
+
+			float yMin = min;
+			float yMax = max;
+
+			float zMin = 10.0f;
+			float zMax = 20.0f;
+
+			for (int i = 0; i < meshCount; i++)
+			{
+				Mesh sphere4 = new Sphere(new Vector3(MathHelper.RandomRangeWithStaticSeed(xMin, xMax), MathHelper.RandomRangeWithStaticSeed(yMin, yMax),
+					MathHelper.RandomRangeWithStaticSeed(zMin, zMax)), MathHelper.RandomRangeWithStaticSeed(0.025f, 0.25f), "Sphere");
+				meshes.Add(sphere4);
+				Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+				materials.Add(sphere4Material);
+			}
 		}
 
 		private void SpawnMap5()

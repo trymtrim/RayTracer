@@ -20,16 +20,12 @@ namespace RayTracerTestBed
 					List<Mesh> meshes = new List<Mesh>();
 
 					for (int i = 0; i < meshIndices.Count; i++)
-					{
 						meshes.Add(scene.meshes[meshIndices[i]]);
-					}
 
 					NearestIntersection(meshes, ray, out distance, out indexOfNearest);
 
 					if (indexOfNearest.HasValue)
-					{
 						indexOfNearest = meshIndices[indexOfNearest.Value];
-					}
 
 					//Console.WriteLine(meshIndices.Count);
 

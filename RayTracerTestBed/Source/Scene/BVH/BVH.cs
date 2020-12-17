@@ -1,28 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace RayTracerTestBed
 {
 	class BVH
 	{
-		public static List<Mesh> Meshes; //TODO: Consider storing this elsewhere
-
 		private BVHNode _root;
 
-		public BVH(List<Mesh> meshes)
+		public BVH(List<Mesh> allMeshes)
 		{
-			Meshes = meshes;
-
 			//Build the BVH
 			List<int> meshIndices = new List<int>();
 
-			for (int i = 0; i < meshes.Count; i++)
+			for (int i = 0; i < allMeshes.Count; i++)
 				meshIndices.Add(i);
 
-			_root = new BVHNode(meshIndices);
+			_root = new BVHNode(meshIndices, allMeshes);
 		}
 
 		public List<int> Traverse(Ray ray)
