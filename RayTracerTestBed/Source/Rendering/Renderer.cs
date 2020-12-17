@@ -14,18 +14,16 @@ namespace RayTracerTestBed
 		{
 			Bitmap bitmap = new Bitmap(settings.width, settings.height);
 
-			Ray ray = new Ray();
-
 			for (int j = 0; j < settings.height; ++j)
 			{
 				for (int i = 0; i < settings.width; ++i)
 				{
-					Vector3 colorVector;
+					Vector3 colorVector = settings.backgroundColor;
 
 					float vx = i / (float)settings.width;
 					float vy = j / (float)settings.height;
 
-					ray = camera.RayThroughScreen(vx, vy);
+					Ray ray = camera.RayThroughScreen(vx, vy);
 
 					if (settings.traceMethod == TraceMethod.WhittedRayTracing)
 						colorVector = RayTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);
@@ -62,8 +60,6 @@ namespace RayTracerTestBed
 						if (uiColor.HasValue)
 							colorVector += uiColor.Value;
 					}
-
-					//TODO: Do gamma correction? Apply post processing?
 
 					float red = MathHelper.Clamp(colorVector.X, 0.0f, 1.0f);
 					float green = MathHelper.Clamp(colorVector.Y, 0.0f, 1.0f);

@@ -8,9 +8,9 @@ namespace RayTracerTestBed
 {
 	class BVH
 	{
-		private BVHNode root;
+		public static List<Mesh> Meshes; //TODO: Consider storing this elsewhere
 
-		public static List<Mesh> Meshes;
+		private BVHNode _root;
 
 		public BVH(List<Mesh> meshes)
 		{
@@ -22,12 +22,12 @@ namespace RayTracerTestBed
 			for (int i = 0; i < meshes.Count; i++)
 				meshIndices.Add(i);
 
-			root = new BVHNode(meshIndices);
+			_root = new BVHNode(meshIndices);
 		}
 
 		public List<int> Traverse(Ray ray)
 		{
-			return root.Traverse(ray);
+			return _root.Traverse(ray);
 		}
 	}
 }

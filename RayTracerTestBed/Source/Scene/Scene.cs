@@ -236,9 +236,9 @@ namespace RayTracerTestBed
 			int width = 50;
 			int height = 4;
 
-			for (int i = -width/2; i < width/2; i++)
+			for (int i = -width / 2; i < width / 2; i++)
 			{
-				for (int j = -height/2; j < height/2; j++)
+				for (int j = -height / 2; j < height / 2; j++)
 				{
 					Mesh sphere4 = new Sphere(new Vector3(i / 2.0f, j / 2.0f, 6.0f), 0.25f, "Sphere4");
 					meshes.Add(sphere4);
@@ -246,6 +246,16 @@ namespace RayTracerTestBed
 					materials.Add(sphere4Material);
 				}
 			}
+
+			//int meshCount = 100;
+
+			//for (int i = 0; i < meshCount; i++)
+			//{
+			//	Mesh sphere4 = new Sphere(new Vector3(, i / 2.0f, 6.0f), 0.25f, "Sphere4");
+			//	meshes.Add(sphere4);
+			//	Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			//	materials.Add(sphere4Material);
+			//}
 		}
 
 		private void SpawnMap5()

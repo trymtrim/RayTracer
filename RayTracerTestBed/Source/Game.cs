@@ -278,7 +278,7 @@ namespace RayTracerTestBed
 
 			PrintStats();
 
-			//TODO: Render bounding boxes in scene as lines (?)
+			//TODO: For debugging - render bounding box edges in scene as lines (?)
 
 			if (settings.showUI)
 			{

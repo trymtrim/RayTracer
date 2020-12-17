@@ -20,88 +20,111 @@ namespace RayTracerTestBed
 		{
 			this.meshIndices = meshIndices;
 
-			bounds = ConstructBoundingBox(meshIndices, true);
+			bounds = ConstructBoundingBox(meshIndices);
 
-			//isLeaf = true;
+			//Subdivide
+			List<int> leftSide = new List<int>();
+			List<int> rightSide = new List<int>();
+			float minimalSplitCost = float.MaxValue;
 
-			if (meshIndices.Count <= 3)
-				isLeaf = true;
-			else
+			float boxWidth = Math.Abs(bounds.minBounds.X - bounds.maxBounds.X);
+			float boxHeight = Math.Abs(bounds.minBounds.Y - bounds.maxBounds.Y);
+			float boxForward = Math.Abs(bounds.minBounds.Z - bounds.maxBounds.Z);
+
+			int splitBins = 8;
+
+			for (int i = 0; i < 3; i++) //0 = X, 1 = Y, 2 = Z
 			{
-				//Subdivide
+				float binSize = i == 0 ? boxWidth / splitBins : (i == 1 ? boxHeight / splitBins : boxForward / splitBins);
 
-				List<int> leftSide = new List<int>();
-				List<int> rightSide = new List<int>();
-
-				float boxWidth = Math.Abs(bounds.minBounds.X - bounds.maxBounds.X);
-				float boxHeight = Math.Abs(bounds.minBounds.Y - bounds.maxBounds.Y);
-				bool splitVertically = boxWidth >= boxHeight;
-
-				//TODO: Consider taking Z-axis into consideration too
-
-				for (int i = 0; i < meshIndices.Count; i++)
+				for (int j = 0; j < splitBins; j++)
 				{
-					Mesh mesh = BVH.Meshes[meshIndices[i]];
+					float splitInterval = j * (binSize);
+					float splitCost = SplitCost(i, splitInterval, out List<int> leftSideMeshes, out List<int> rightSideMeshes);
 
-					if (splitVertically)
+					if (splitCost < minimalSplitCost)
 					{
-						//Split vertically
-						float xSplitPlanePosition = bounds.minBounds.X + boxWidth / 2.0f;
+						leftSide = leftSideMeshes;
+						rightSide = rightSideMeshes;
 
-						//Console.WriteLine(mesh.Center().X);
-
-						if (mesh.Center().X < xSplitPlanePosition)
-						{
-							leftSide.Add(meshIndices[i]);
-
-							Console.WriteLine("Vertical Left");
-						}
-						else
-						{
-							rightSide.Add(meshIndices[i]);
-
-							Console.WriteLine("Vertical Right");
-						}
-					}
-					else
-					{
-						//Split horizontally
-						float ySplitPlanePosition = bounds.minBounds.Y + boxHeight / 2.0f;
-
-						//Console.WriteLine(ySplitPlanePosition);
-
-						if (mesh.Center().Y < ySplitPlanePosition)
-						{
-							leftSide.Add(meshIndices[i]);
-
-							Console.WriteLine("Horizontal Left");
-						}
-						else
-						{
-							rightSide.Add(meshIndices[i]);
-
-							Console.WriteLine("Horizontal Right");
-						}
+						minimalSplitCost = splitCost;
 					}
 				}
-
-				bounds = ConstructBoundingBox(meshIndices, true);
-
-				//Temp?
-				//if (leftSide.Count == 0 || rightSide.Count == 0)
-				//	Console.WriteLine("ERROR");
-
-				Console.WriteLine(meshIndices.Count);
-
-				if (leftSide.Count > 0)
-					leftChildNode = new BVHNode(leftSide);
-				if (rightSide.Count > 0)
-					rightChildNode = new BVHNode(rightSide);
 			}
+
+			if (meshIndices.Count == 1 || minimalSplitCost >= bounds.SurfaceArea() * meshIndices.Count)
+			{
+				isLeaf = true;
+				return;
+			}
+
+			Console.WriteLine(meshIndices.Count);
+
+			leftChildNode = new BVHNode(leftSide);
+			rightChildNode = new BVHNode(rightSide);
 		}
 
-		private AABB ConstructBoundingBox(List<int> meshIndices, bool recalculate = false)
+		private float SplitCost(int splitAxis, float splitInterval, out List<int> leftSide, out List<int> rightSide)
 		{
+			leftSide = new List<int>();
+			rightSide = new List<int>();
+
+			for (int i = 0; i < meshIndices.Count; i++)
+			{
+				Mesh mesh = BVH.Meshes[meshIndices[i]];
+
+				switch (splitAxis)
+				{
+					case 0: //Split vertically
+						{
+							float xSplitPlanePosition = bounds.minBounds.X + splitInterval;
+
+							if (mesh.Center().X < xSplitPlanePosition)
+								leftSide.Add(meshIndices[i]);
+							else
+								rightSide.Add(meshIndices[i]);
+
+							break;
+						}
+					case 1: //Split horizontally
+						{
+							float ySplitPlanePosition = bounds.minBounds.Y + splitInterval;
+
+							if (mesh.Center().Y < ySplitPlanePosition)
+								leftSide.Add(meshIndices[i]);
+							else
+								rightSide.Add(meshIndices[i]);
+
+							break;
+						}
+					case 2: //Split vertically 90 degrees
+						{
+							float zSplitPlanePosition = bounds.minBounds.Z + splitInterval;
+
+							if (mesh.Center().Z < zSplitPlanePosition)
+								leftSide.Add(meshIndices[i]);
+							else
+								rightSide.Add(meshIndices[i]);
+
+							break;
+						}
+				}
+			}
+
+			//TODO: These constructed bounding boxes can be passed on, instead of creating new ones when allocating child nodes
+
+			float aLeft = ConstructBoundingBox(leftSide).SurfaceArea();
+			float nLeft = leftSide.Count;
+			float aRight = ConstructBoundingBox(rightSide).SurfaceArea();
+			float nRight = rightSide.Count;
+
+			return aLeft * nLeft + aRight * nRight;
+		}
+
+		private AABB ConstructBoundingBox(List<int> meshIndices)
+		{
+			//TODO: This only works for spheres right now, make it work for planes too?
+
 			Vector3 minBounds = new Vector3(float.MaxValue);
 			Vector3 maxBounds = new Vector3(float.MinValue);
 
@@ -109,50 +132,25 @@ namespace RayTracerTestBed
 			{
 				Mesh mesh = BVH.Meshes[meshIndices[i]];
 
-				if (recalculate)
-				{
-					float xMax = mesh.Center().X + mesh.Radius();
-					if (xMax > maxBounds.X)
-						maxBounds.X = xMax;
-					float yMax = mesh.Center().Y + mesh.Radius();
-					if (yMax > maxBounds.Y)
-						maxBounds.Y = yMax;
-					float zMax = mesh.Center().Z + mesh.Radius();
-					if (zMax > maxBounds.Z)
-						maxBounds.Z = zMax;
+				float xMax = mesh.Center().X + mesh.Radius();
+				if (xMax > maxBounds.X)
+					maxBounds.X = xMax;
+				float yMax = mesh.Center().Y + mesh.Radius();
+				if (yMax > maxBounds.Y)
+					maxBounds.Y = yMax;
+				float zMax = mesh.Center().Z + mesh.Radius();
+				if (zMax > maxBounds.Z)
+					maxBounds.Z = zMax;
 
-					float xMin = mesh.Center().X - mesh.Radius();
-					if (xMin < minBounds.X)
-						minBounds.X = xMin;
-					float yMin = mesh.Center().Y - mesh.Radius();
-					if (yMin < minBounds.Y)
-						minBounds.Y = yMin;
-					float zMin = mesh.Center().Z - mesh.Radius();
-					if (zMin < minBounds.Z)
-						minBounds.Z = zMin;
-				}
-				else
-				{
-					float xMax = mesh.Center().X;
-					if (xMax > maxBounds.X)
-						maxBounds.X = xMax;
-					float yMax = mesh.Center().Y;
-					if (yMax > maxBounds.Y)
-						maxBounds.Y = yMax;
-					float zMax = mesh.Center().Z;
-					if (zMax > maxBounds.Z)
-						maxBounds.Z = zMax;
-
-					float xMin = mesh.Center().X;
-					if (xMin < minBounds.X)
-						minBounds.X = xMin;
-					float yMin = mesh.Center().Y;
-					if (yMin < minBounds.Y)
-						minBounds.Y = yMin;
-					float zMin = mesh.Center().Z;
-					if (zMin < minBounds.Z)
-						minBounds.Z = zMin;
-				}
+				float xMin = mesh.Center().X - mesh.Radius();
+				if (xMin < minBounds.X)
+					minBounds.X = xMin;
+				float yMin = mesh.Center().Y - mesh.Radius();
+				if (yMin < minBounds.Y)
+					minBounds.Y = yMin;
+				float zMin = mesh.Center().Z - mesh.Radius();
+				if (zMin < minBounds.Z)
+					minBounds.Z = zMin;
 			}
 
 			AABB boundingBox = new AABB(minBounds, maxBounds);
@@ -226,11 +224,8 @@ namespace RayTracerTestBed
 
 				List<int> meshesInNode = new List<int>();
 
-				if (leftChildNode != null)
-					meshesInNode.AddRange(leftChildNode.Traverse(ray));
-
-				if (rightChildNode != null)
-					meshesInNode.AddRange(rightChildNode.Traverse(ray));
+				meshesInNode.AddRange(leftChildNode.Traverse(ray));
+				meshesInNode.AddRange(rightChildNode.Traverse(ray));
 
 				return meshesInNode;
 			}
