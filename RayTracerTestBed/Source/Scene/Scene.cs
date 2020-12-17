@@ -256,28 +256,98 @@ namespace RayTracerTestBed
 			//	}
 			//}
 
-			int meshCount = 1000;
+			//int meshCount = 1000;
 
-			float min = -12.0f / 12;
-			float max = 12.0f / 12;
+			//float min = -12.0f / 12;
+			//float max = 12.0f / 12;
 
-			float xMin = min;
-			float xMax = max;
+			//float xMin = min;
+			//float xMax = max;
 
-			float yMin = min / 3;
-			float yMax = max;
+			//float yMin = min / 3;
+			//float yMax = max;
 
-			float zMin = 10.0f / 12;
-			float zMax = 20.0f / 12;
+			//float zMin = 10.0f / 12;
+			//float zMax = 20.0f / 12;
 
-			for (int i = 0; i < meshCount; i++)
+			//for (int i = 0; i < meshCount; i++)
+			//{
+			//	Mesh sphere4 = new Sphere(new Vector3(MathHelper.RandomRangeWithStaticSeed(xMin, xMax), MathHelper.RandomRangeWithStaticSeed(yMin, yMax),
+			//		MathHelper.RandomRangeWithStaticSeed(zMin, zMax)), MathHelper.RandomRangeWithStaticSeed(0.01f, 0.02f), "Sphere");
+			//	meshes.Add(sphere4);
+			//	Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			//	materials.Add(sphere4Material);
+			//}
+
+			AddSphereFigure(5);
+		}
+
+		private void AddSphereFigure(int layers)
+		{
+			Vector3 initialPosition = new Vector3(0.0f, 0.5f, 6.0f);
+			float initialScale = 1.0f;
+
+			Mesh sphere = new Sphere(initialPosition, initialScale, "Sphere");
+			meshes.Add(sphere);
+			Material sphereMaterial = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			materials.Add(sphereMaterial);
+
+			AddFigureLayer(initialPosition, initialScale, layers, layers);
+		}
+
+		private void AddFigureLayer(Vector3 initialPosition, float initialScale, int layer, int totalLayers, int excludeIndex = -1)
+		{
+			for (int i = 0; i < 6; i++)
 			{
-				Mesh sphere4 = new Sphere(new Vector3(MathHelper.RandomRangeWithStaticSeed(xMin, xMax), MathHelper.RandomRangeWithStaticSeed(yMin, yMax),
-					MathHelper.RandomRangeWithStaticSeed(zMin, zMax)), MathHelper.RandomRangeWithStaticSeed(0.01f, 0.02f), "Sphere");
-				meshes.Add(sphere4);
-				Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-				materials.Add(sphere4Material);
+				if (i == excludeIndex)
+					continue;
+
+				float scale = initialScale / 2.5f;
+				Vector3 position = initialPosition;
+
+				AddSphereToFigure(position, scale, initialScale, i, layer, totalLayers);
 			}
+		}
+
+		private void AddSphereToFigure(Vector3 position, float scale, float previousScale, int positionIndex, int layer, int totalLayers)
+		{
+			int excludeIndex = 0;
+
+			switch (positionIndex)
+			{
+				case 0:
+					position.X += previousScale + scale;
+					excludeIndex = 1;
+					break;
+				case 1:
+					position.X -= previousScale + scale;
+					excludeIndex = 0;
+					break;
+				case 2:
+					position.Y += previousScale + scale;
+					excludeIndex = 3;
+					break;
+				case 3:
+					position.Y -= previousScale + scale;
+					excludeIndex = 2;
+					break;
+				case 4:
+					position.Z += previousScale + scale;
+					excludeIndex = 5;
+					break;
+				case 5:
+					position.Z -= previousScale + scale;
+					excludeIndex = 4;
+					break;
+			}
+
+			Mesh sphereChild = new Sphere(position, scale, "Sphere");
+			meshes.Add(sphereChild);
+			Material sphereChildMaterial = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			materials.Add(sphereChildMaterial);
+
+			if (layer > 1)
+				AddFigureLayer(position, scale, layer - 1, totalLayers, excludeIndex);
 		}
 
 		private void SpawnMap5()

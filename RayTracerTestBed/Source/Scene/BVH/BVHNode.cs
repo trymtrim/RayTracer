@@ -6,12 +6,10 @@ namespace RayTracerTestBed
 {
 	class BVHNode
 	{
-		//TODO: Make all of this become a total of 32 bytes (?)
 		public AABB bounds;
 		public bool isLeaf;
 		public BVHNode leftChildNode, rightChildNode;
 		public List<int> meshIndices;
-		//public List<Mesh> meshes; //Consider changing this to "int first, count;" instead?
 
 		public BVHNode(List<int> meshIndices, List<Mesh> allMeshes)
 		{
@@ -161,40 +159,28 @@ namespace RayTracerTestBed
 
 		private bool Intersect(Ray ray)
 		{
-			Vector3 dirFrac = new Vector3
-			{
-				X = 1.0f / ray.direction.X,
-				Y = 1.0f / ray.direction.Y,
-				Z = 1.0f / ray.direction.Z
-			};
+			Vector3 dirFrac = ray.dirFrac;
 
 			//TODO: This multiplication is slow
-			float t1 = (bounds.minBounds.X - ray.origin.X) * dirFrac.X;
-			float t2 = (bounds.maxBounds.X - ray.origin.X) * dirFrac.X;
-			float t3 = (bounds.minBounds.Y - ray.origin.Y) * dirFrac.Y;
-			float t4 = (bounds.maxBounds.Y - ray.origin.Y) * dirFrac.Y;
-			float t5 = (bounds.minBounds.Z - ray.origin.Z) * dirFrac.Z;
-			float t6 = (bounds.maxBounds.Z - ray.origin.Z) * dirFrac.Z;
+			float tx1 = (bounds.minBounds.X - ray.origin.X) * dirFrac.X;
+			float tx2 = (bounds.maxBounds.X - ray.origin.X) * dirFrac.X;
+			float ty1 = (bounds.minBounds.Y - ray.origin.Y) * dirFrac.Y;
+			float ty2 = (bounds.maxBounds.Y - ray.origin.Y) * dirFrac.Y;
+			float tz1 = (bounds.minBounds.Z - ray.origin.Z) * dirFrac.Z;
+			float tz2 = (bounds.maxBounds.Z - ray.origin.Z) * dirFrac.Z;
 
-			float tmin = Math.Max(Math.Max(Math.Min(t1, t2), Math.Min(t3, t4)), Math.Min(t5, t6));
-			float tmax = Math.Min(Math.Min(Math.Max(t1, t2), Math.Max(t3, t4)), Math.Max(t5, t6));
+			float tMin = Math.Max(Math.Max(Math.Min(tx1, tx2), Math.Min(ty1, ty2)), Math.Min(tz1, tz2));
+			float tMax = Math.Min(Math.Min(Math.Max(tx1, tx2), Math.Max(ty1, ty2)), Math.Max(tz1, tz2));
 
 			//If tmax < 0, ray (line) is intersecting AABB, but the whole AABB is behind us
-			if (tmax < 0)
-			{
-				//t = tmax;
+			if (tMax < 0)
 				return false;
-			}
 
 			//If tmin > tmax, ray doesn't intersect AABB
-			if (tmin > tmax)
-			{
-				//t = tmax;
-				return false;
-			}
 
-			//t = tmin;
-			return true;
+			return tMax >= tMin;
+
+			//REMINDER: Intersect primitves here?
 		}
 
 		public List<int> Traverse(Ray ray)

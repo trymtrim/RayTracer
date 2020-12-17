@@ -19,6 +19,7 @@ namespace RayTracerTestBed
 
 		public List<int> Traverse(Ray ray)
 		{
+			ray.InitializeDirFrac();
 			return _root.Traverse(ray);
 		}
 	}
