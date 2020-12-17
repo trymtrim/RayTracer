@@ -21,9 +21,9 @@ namespace RayTracerTestBed
 		//Stats
 		public static Stopwatch renderTimeStopwatch = new Stopwatch();
 		public static int numPrimaryRays = 0;
-		public static int numRayTests = 0;
+		public static Int64 numRayTests = 0;
 		public static int numRayIntersections = 0;
-
+		
 		public void Init()
 		{
 			//Initialize settings
@@ -300,7 +300,8 @@ namespace RayTracerTestBed
 			Console.WriteLine("Render time: " + renderTime + "\n");
 			Console.WriteLine("Primary rays: " + numPrimaryRays);
 			Console.WriteLine("Intersection tests: " + numRayTests);
-			Console.WriteLine("Ray intersections: " + numRayIntersections);
+			Console.WriteLine("Ray intersections: " + numRayIntersections + "\n");
+			Console.WriteLine("Average intersection tests per pixel: " + numRayTests / (settings.width * settings.height));
 
 			numPrimaryRays = 0;
 			numRayTests = 0;

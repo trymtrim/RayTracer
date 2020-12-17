@@ -51,7 +51,7 @@ namespace RayTracerTestBed
 
 			//Console.WriteLine(meshIndices.Count); //Debug
 
-			if (meshIndices.Count == 1 || minimalSplitCost >= bounds.SurfaceArea() * meshIndices.Count)
+			if (meshIndices.Count <= 2 || minimalSplitCost >= bounds.SurfaceArea() * meshIndices.Count)
 			{
 				//Debug
 				//if (meshIndices.Count > 1)

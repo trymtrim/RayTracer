@@ -256,24 +256,24 @@ namespace RayTracerTestBed
 			//	}
 			//}
 
-			int meshCount = 100;
+			int meshCount = 1000;
 
-			float min = -12.0f;
-			float max = 12.0f;
+			float min = -12.0f / 12;
+			float max = 12.0f / 12;
 
 			float xMin = min;
 			float xMax = max;
 
-			float yMin = min;
+			float yMin = min / 3;
 			float yMax = max;
 
-			float zMin = 10.0f;
-			float zMax = 20.0f;
+			float zMin = 10.0f / 12;
+			float zMax = 20.0f / 12;
 
 			for (int i = 0; i < meshCount; i++)
 			{
 				Mesh sphere4 = new Sphere(new Vector3(MathHelper.RandomRangeWithStaticSeed(xMin, xMax), MathHelper.RandomRangeWithStaticSeed(yMin, yMax),
-					MathHelper.RandomRangeWithStaticSeed(zMin, zMax)), MathHelper.RandomRangeWithStaticSeed(0.025f, 0.25f), "Sphere");
+					MathHelper.RandomRangeWithStaticSeed(zMin, zMax)), MathHelper.RandomRangeWithStaticSeed(0.01f, 0.02f), "Sphere");
 				meshes.Add(sphere4);
 				Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
 				materials.Add(sphere4Material);
