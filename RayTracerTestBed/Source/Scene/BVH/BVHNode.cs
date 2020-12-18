@@ -6,10 +6,10 @@ namespace RayTracerTestBed
 {
 	class BVHNode
 	{
-		public AABB bounds;
-		public bool isLeaf;
-		public BVHNode leftChildNode, rightChildNode;
-		public List<int> meshIndices;
+		private AABB bounds;
+		private bool isLeaf;
+		private BVHNode leftChildNode, rightChildNode;
+		private List<int> meshIndices;
 
 		public BVHNode(List<int> meshIndices, List<Mesh> allMeshes)
 		{
@@ -22,24 +22,26 @@ namespace RayTracerTestBed
 
 		private void Subdivide(List<Mesh> allMeshes)
 		{
-			List<int> leftSide = new List<int>();
-			List<int> rightSide = new List<int>();
+			List<int> leftSide = null;
+			List<int> rightSide = null;
+
 			float minimalSplitCost = float.MaxValue;
 
 			float boxWidth = Math.Abs(bounds.minX - bounds.maxX);
 			float boxHeight = Math.Abs(bounds.minY - bounds.maxY);
 			float boxForward = Math.Abs(bounds.minZ - bounds.maxZ);
 
-			int splitBins = Config.SPLIT_PLANE_BINS;
+			int splitPlaneCount = Config.BINNING_SPLIT_PLANE_COUNT;
+
+			GenerateBins(allMeshes, splitPlaneCount, boxWidth, boxHeight, boxForward, out List<List<int>> xBins, out List<List<int>> yBins, out List<List<int>> zBins);
 
 			for (int i = 0; i < 3; i++) //0 = X, 1 = Y, 2 = Z
 			{
-				float binSize = i == 0 ? boxWidth / splitBins : (i == 1 ? boxHeight / splitBins : boxForward / splitBins);
+				float binSize = i == 0 ? boxWidth / splitPlaneCount : (i == 1 ? boxHeight / splitPlaneCount : boxForward / splitPlaneCount);
 
-				for (int j = 0; j < splitBins; j++)
+				for (int j = 0; j < splitPlaneCount; j++)
 				{
-					float splitInterval = j * binSize;
-					float splitCost = SplitCost(i, splitInterval, allMeshes, out List<int> leftSideMeshes, out List<int> rightSideMeshes);
+					float splitCost = SplitCost(i, j, allMeshes, xBins, yBins, zBins, out List<int> leftSideMeshes, out List<int> rightSideMeshes);
 
 					if (splitCost < minimalSplitCost)
 					{
@@ -61,51 +63,117 @@ namespace RayTracerTestBed
 			rightChildNode = new BVHNode(rightSide, allMeshes);
 		}
 
-		private float SplitCost(int splitAxis, float splitInterval, List<Mesh> allMeshes, out List<int> leftSide, out List<int> rightSide)
+		private void GenerateBins(List<Mesh> allMeshes, int splitPlaneCount, float boxWidth, float boxHeight, float boxForward, out List<List<int>> xBins, out List<List<int>> yBins, out List<List<int>> zBins)
 		{
-			leftSide = new List<int>();
-			rightSide = new List<int>();
+			xBins = new List<List<int>>();
+			yBins = new List<List<int>>();
+			zBins = new List<List<int>>();
+
+			for (int i = 0; i < splitPlaneCount; i++)
+			{
+				xBins.Add(new List<int>());
+				yBins.Add(new List<int>());
+				zBins.Add(new List<int>());
+			}
+
+			float xBinSize = boxWidth / splitPlaneCount;
+			float yBinSize = boxHeight / splitPlaneCount;
+			float zBinSize = boxForward / splitPlaneCount;
 
 			for (int i = 0; i < meshIndices.Count; i++)
 			{
 				Mesh mesh = allMeshes[meshIndices[i]];
 
-				switch (splitAxis)
+				for (int j = 0; j < splitPlaneCount; j++)
 				{
-					case 0: //Split vertically
-						{
-							float xSplitPlanePosition = bounds.minX + splitInterval;
+					float xSplitInterval = j * xBinSize;
+					float xPosition = mesh.Center().X;
 
-							if (mesh.Center().X < xSplitPlanePosition)
-								leftSide.Add(meshIndices[i]);
-							else
-								rightSide.Add(meshIndices[i]);
+					if (j == splitPlaneCount - 1)
+					{
+						if (xPosition >= bounds.minX + xSplitInterval && xPosition < bounds.minX + xSplitInterval + xBinSize + Renderer.EPSILON)
+							xBins[j].Add(meshIndices[i]);
+					}
+					else
+					{
+						if (xPosition >= bounds.minX + xSplitInterval && xPosition < bounds.minX + xSplitInterval + xBinSize)
+							xBins[j].Add(meshIndices[i]);
+					}
 
-							break;
-						}
-					case 1: //Split horizontally
-						{
-							float ySplitPlanePosition = bounds.minY + splitInterval;
+					float ySplitInterval = j * yBinSize;
+					float yPosition = mesh.Center().Y;
 
-							if (mesh.Center().Y < ySplitPlanePosition)
-								leftSide.Add(meshIndices[i]);
-							else
-								rightSide.Add(meshIndices[i]);
+					if (j == splitPlaneCount - 1)
+					{
+						if (yPosition >= bounds.minY + ySplitInterval && yPosition < bounds.minY + ySplitInterval + yBinSize + Renderer.EPSILON)
+							yBins[j].Add(meshIndices[i]);
+					}
+					else
+					{
+						if (yPosition >= bounds.minY + ySplitInterval && yPosition < bounds.minY + ySplitInterval + yBinSize)
+							yBins[j].Add(meshIndices[i]);
+					}
 
-							break;
-						}
-					case 2: //Split vertically 90 degrees
-						{
-							float zSplitPlanePosition = bounds.minZ + splitInterval;
+					float zSplitInterval = j * zBinSize;
+					float zPosition = mesh.Center().Z;
 
-							if (mesh.Center().Z < zSplitPlanePosition)
-								leftSide.Add(meshIndices[i]);
-							else
-								rightSide.Add(meshIndices[i]);
-
-							break;
-						}
+					if (j == splitPlaneCount - 1)
+					{
+						if (zPosition >= bounds.minZ + zSplitInterval && zPosition < bounds.minZ + zSplitInterval + zBinSize + Renderer.EPSILON)
+							zBins[j].Add(meshIndices[i]);
+					}
+					else
+					{
+						if (zPosition >= bounds.minZ + zSplitInterval && zPosition < bounds.minZ + zSplitInterval + zBinSize)
+							zBins[j].Add(meshIndices[i]);
+					}
 				}
+			}
+		}
+
+		private float SplitCost(int splitAxis, int binIndex, List<Mesh> allMeshes, List<List<int>> xBins, List<List<int>> yBins, List<List<int>> zBins,out List<int> leftSide, out List<int> rightSide)
+		{
+			leftSide = new List<int>();
+			rightSide = new List<int>();
+
+			switch (splitAxis)
+			{
+				case 0: //Split vertically
+					{
+						for (int i = 0; i < xBins.Count; i++)
+						{
+							if (i > binIndex)
+								rightSide.AddRange(xBins[i]);
+							else
+								leftSide.AddRange(xBins[i]);
+						}
+
+						break;
+					}
+				case 1: //Split horizontally
+					{
+						for (int i = 0; i < yBins.Count; i++)
+						{
+							if (i > binIndex)
+								rightSide.AddRange(yBins[i]);
+							else
+								leftSide.AddRange(yBins[i]);
+						}
+
+						break;
+					}
+				case 2: //Split vertically 90 degrees
+					{
+						for (int i = 0; i < zBins.Count; i++)
+						{
+							if (i > binIndex)
+								rightSide.AddRange(zBins[i]);
+							else
+								leftSide.AddRange(zBins[i]);
+						}
+
+						break;
+					}
 			}
 
 			float aLeft = ConstructBoundingBox(leftSide, allMeshes).SurfaceArea();
@@ -116,14 +184,14 @@ namespace RayTracerTestBed
 			return aLeft * nLeft + aRight * nRight;
 		}
 
-		private AABB ConstructBoundingBox(List<int> meshIndices, List<Mesh> allMeshes)
+		private AABB ConstructBoundingBox(List<int> meshes, List<Mesh> allMeshes)
 		{
 			//This only works for spheres
 			AABB boundingBox = new AABB();
 
-			for (int i = 0; i < meshIndices.Count; i++)
+			for (int i = 0; i < meshes.Count; i++)
 			{
-				Mesh mesh = allMeshes[meshIndices[i]];
+				Mesh mesh = allMeshes[meshes[i]];
 
 				float xMax = mesh.Center().X;// + mesh.Radius();
 				if (xMax > boundingBox.maxX)
@@ -149,15 +217,15 @@ namespace RayTracerTestBed
 			return boundingBox;
 		}
 
-		private void RecalculateBoundingBoxWithFullExtents(List<int> meshIndices, List<Mesh> allMeshes)
+		private void RecalculateBoundingBoxWithFullExtents(List<int> meshes, List<Mesh> allMeshes)
 		{
 			//This only works for spheres
 			bounds.minX = bounds.minY = bounds.minZ = float.MaxValue;
 			bounds.maxX = bounds.maxY = bounds.maxZ = float.MinValue;
 
-			for (int i = 0; i < meshIndices.Count; i++)
+			for (int i = 0; i < meshes.Count; i++)
 			{
-				Mesh mesh = allMeshes[meshIndices[i]];
+				Mesh mesh = allMeshes[meshes[i]];
 
 				float xMax = mesh.Center().X + mesh.Radius();
 				if (xMax > bounds.maxX)
