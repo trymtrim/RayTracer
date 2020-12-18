@@ -1,24 +1,33 @@
 ﻿using System;
-using OpenTK;
 
 namespace RayTracerTestBed
 {
 	class AABB
 	{
-		public Vector3 minBounds;
-		public Vector3 maxBounds;
+		public float minX, minY, minZ;
+		public float maxX, maxY, maxZ;
 
-		public AABB(Vector3 minBounds, Vector3 maxBounds)
+		public AABB()
 		{
-			this.minBounds = minBounds;
-			this.maxBounds = maxBounds;
+			minX = minY = minZ = float.MaxValue;
+			maxX = maxY = maxZ = float.MinValue;
+		}
+
+		public AABB(float minX, float minY, float minZ, float maxX, float maxY, float maxZ)
+		{
+			this.minX = minX;
+			this.minY = minY;
+			this.minZ = minZ;
+			this.maxX = maxX;
+			this.maxY = maxY;
+			this.maxZ = maxZ;
 		}
 
 		public float SurfaceArea()
 		{
-			float boxWidth = Math.Abs(minBounds.X - maxBounds.X);
-			float boxHeight = Math.Abs(minBounds.Y - maxBounds.Y);
-			float boxForward = Math.Abs(minBounds.Z - maxBounds.Z);
+			float boxWidth = Math.Abs(minX - maxX);
+			float boxHeight = Math.Abs(minY - maxY);
+			float boxForward = Math.Abs(minZ - maxZ);
 
 			float a = boxWidth * boxHeight;
 			float b = boxHeight * boxForward;

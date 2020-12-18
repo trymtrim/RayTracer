@@ -8,6 +8,9 @@ namespace RayTracerTestBed
 	{
 		public static Vector3 Trace(int depth, Scene scene, Ray ray, Vector3 backgroundColor)
 		{
+			if (depth == Game.settings.maxDepth)
+				Game.numPrimaryRays++;
+
 			float distance = 0.0f;
 			int? indexOfNearest = null;
 
@@ -17,28 +20,19 @@ namespace RayTracerTestBed
 
 				if (meshIndices.Count > 0)
 				{
-					List<Mesh> meshes = new List<Mesh>();
+					Game.numRayTests += meshIndices.Count;
 
-					for (int i = 0; i < meshIndices.Count; i++)
-						meshes.Add(scene.meshes[meshIndices[i]]);
-
-					NearestIntersection(meshes, ray, out distance, out indexOfNearest);
+					NearestIntersection(scene, meshIndices, ray, out distance, out indexOfNearest);
 
 					if (indexOfNearest.HasValue)
 						indexOfNearest = meshIndices[indexOfNearest.Value];
-
-					//Console.WriteLine(meshIndices.Count);
-
-					if (depth == Game.settings.maxDepth)
-						Game.numPrimaryRays++;
 				}
 			}
 			else
 			{
-				NearestIntersection(scene.meshes, ray, out distance, out indexOfNearest);
+				Game.numRayTests += scene.meshes.Count;
 
-				if (depth == Game.settings.maxDepth)
-					Game.numPrimaryRays++;
+				NearestIntersection(scene.meshes, ray, out distance, out indexOfNearest);
 			}
 
 			if (indexOfNearest.HasValue)
@@ -191,9 +185,29 @@ namespace RayTracerTestBed
 
 			for (int i = 0; i < meshes.Count; i++)
 			{
-				Game.numRayTests++;
-
 				var intersection = meshes[i].Intersect(ray);
+
+				if (intersection.HasValue)
+				{
+					float t = intersection.Value;
+
+					if (t < distance)
+					{
+						distance = t;
+						indexOfNearest = i;
+					}
+				}
+			}
+		}
+
+		public static void NearestIntersection(Scene scene, List<int> meshIndices, Ray ray, out float distance, out int? indexOfNearest)
+		{
+			distance = float.MaxValue;
+			indexOfNearest = null;
+
+			for (int i = 0; i < meshIndices.Count; i++)
+			{
+				var intersection = scene.meshes[meshIndices[i]].Intersect(ray);
 
 				if (intersection.HasValue)
 				{
@@ -225,10 +239,29 @@ namespace RayTracerTestBed
 
 					if (distance.HasValue)
 					{
-						float outDistance;
+						float outDistance = 0.0f;
 						int? outIndexOfNearest;
 
-						NearestIntersection(scene.meshes, ray, out outDistance, out outIndexOfNearest);
+						if (Config.USE_BVH)
+						{
+							List<int> meshIndices = scene.bvh.Traverse(ray, false);
+
+							if (meshIndices.Count > 0)
+							{
+								Game.numRayTests += meshIndices.Count;
+
+								NearestIntersection(scene, meshIndices, ray, out outDistance, out outIndexOfNearest);
+
+								if (outIndexOfNearest.HasValue)
+									outIndexOfNearest = meshIndices[outIndexOfNearest.Value];
+							}
+						}
+						else
+						{
+							Game.numRayTests += scene.meshes.Count;
+
+							NearestIntersection(scene.meshes, ray, out outDistance, out outIndexOfNearest);
+						}
 
 						if (outDistance >= distance - Renderer.EPSILON)
 						{
@@ -247,10 +280,27 @@ namespace RayTracerTestBed
 
 					var ray = new Ray(lightCenter, pathNormalized);
 
-					float outDistance;
+					float outDistance = 0.0f;
 					int? outIndexOfNearest;
 
-					NearestIntersection(scene.meshes, ray, out outDistance, out outIndexOfNearest);
+					if (Config.USE_BVH)
+					{
+						List<int> meshIndices = scene.bvh.Traverse(ray, false);
+
+						if (meshIndices.Count > 0)
+						{
+							Game.numRayTests += meshIndices.Count;
+
+							NearestIntersection(scene, meshIndices, ray, out outDistance, out outIndexOfNearest);
+
+							if (outIndexOfNearest.HasValue)
+								outIndexOfNearest = meshIndices[outIndexOfNearest.Value];
+						}
+					}
+					else
+					{
+						NearestIntersection(scene.meshes, ray, out outDistance, out outIndexOfNearest);
+					}
 
 					if (outDistance >= distance - Renderer.EPSILON)
 					{

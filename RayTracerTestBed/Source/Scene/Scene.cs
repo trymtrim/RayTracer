@@ -12,7 +12,8 @@ namespace RayTracerTestBed
 		Photograph,
 		Everything,
 		Mirrors,
-		Room
+		Room,
+		BVH
 	}
 
 	class Scene
@@ -57,6 +58,9 @@ namespace RayTracerTestBed
 					break;
 				case SceneType.Room:
 					SpawnMap6();
+					break;
+				case SceneType.BVH:
+					SpawnBVHMap();
 					break;
 			}
 
@@ -200,154 +204,47 @@ namespace RayTracerTestBed
 		private void SpawnMap4()
 		{
 			//Skybox
-			//skybox = new Skybox(scene);
+			skybox = new Skybox(scene);
 
 			//Directional light
 			Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f), 2.4f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
 			lights.Add(light);
 
-			//Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.5f, 8.0f), new Vector3(10.0f), "Floor");
-			//meshes.Add(plane);
-			//Material planeMaterial = new ReflectionMaterial(TextureType.Checkerboard, 0.9f, new Vector3(0, 1, 0));
-			//materials.Add(planeMaterial);
-			//skybox = null;
+			Mesh plane = new Plane(new Vector3(0.0f, -1.0f, 0.0f), new Vector3(0.0f, -2.5f, 8.0f), new Vector3(10.0f), "Floor");
+			meshes.Add(plane);
+			Material planeMaterial = new ReflectionMaterial(TextureType.Checkerboard, 0.9f, new Vector3(0, 1, 0));
+			materials.Add(planeMaterial);
+			skybox = null;
 
-			//Mesh sphere1 = new Sphere(new Vector3(-4.0f, 1.5f, 6.0f), 1.0f, "Sphere1");
-			//meshes.Add(sphere1);
-			//Material sphere1Material = new RefractionMaterial(TextureType.Color, 1.02f, 0.98f);
-			//materials.Add(sphere1Material);
+			Mesh sphere1 = new Sphere(new Vector3(-4.0f, 1.5f, 6.0f), 1.0f, "Sphere1");
+			meshes.Add(sphere1);
+			Material sphere1Material = new RefractionMaterial(TextureType.Color, 1.02f, 0.98f);
+			materials.Add(sphere1Material);
 
-			//Mesh sphere2 = new Sphere(new Vector3(1.0f, -2.0f, 9.0f), 2.0f, "Sphere2");
-			//meshes.Add(sphere2);
-			//Material sphere2Material = new TransparentMaterial(TextureType.Color, 0.8f, new Vector3(0.8f, 0.2f, 0.2f));
-			//materials.Add(sphere2Material);
+			Mesh sphere2 = new Sphere(new Vector3(1.0f, -2.0f, 9.0f), 2.0f, "Sphere2");
+			meshes.Add(sphere2);
+			Material sphere2Material = new TransparentMaterial(TextureType.Color, 0.8f, new Vector3(0.8f, 0.2f, 0.2f));
+			materials.Add(sphere2Material);
 
-			//Mesh sphere3 = new Sphere(new Vector3(-2.0f, 1.0f, 11.0f), 1.5f, "Sphere3");
-			//meshes.Add(sphere3);
-			//Material sphere3Material = new ReflectionMaterial(TextureType.Color, 0.98f);
-			//materials.Add(sphere3Material);
+			Mesh sphere3 = new Sphere(new Vector3(-2.0f, 1.0f, 11.0f), 1.5f, "Sphere3");
+			meshes.Add(sphere3);
+			Material sphere3Material = new ReflectionMaterial(TextureType.Color, 0.98f);
+			materials.Add(sphere3Material);
 
-			//Mesh sphere4 = new Sphere(new Vector3(3.0f, 1.2f, 6.0f), 1.5f, "Sphere4");
-			//meshes.Add(sphere4);
-			//Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-			//materials.Add(sphere4Material);
+			Mesh sphere4 = new Sphere(new Vector3(3.0f, 1.2f, 6.0f), 1.5f, "Sphere4");
+			meshes.Add(sphere4);
+			Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			materials.Add(sphere4Material);
 
-			//Mesh sphere5 = new Sphere(new Vector3(1.0f, 1.5f, 11.0f), 1.0f, "Sphere5");
-			//meshes.Add(sphere5);
-			//Material sphere5Material = new DiffuseMaterial(TextureType.Texture, "../../Assets/Textures/test.png");
-			//materials.Add(sphere5Material);
+			Mesh sphere5 = new Sphere(new Vector3(1.0f, 1.5f, 11.0f), 1.0f, "Sphere5");
+			meshes.Add(sphere5);
+			Material sphere5Material = new DiffuseMaterial(TextureType.Texture, "../../Assets/Textures/test.png");
+			materials.Add(sphere5Material);
 
-			//Mesh sphere6 = new Sphere(new Vector3(-1.0f, 2.0f, 5.0f), 0.5f, "Sphere6");
-			//meshes.Add(sphere6);
-			//Material sphere6Material = new ReflectionRefractionMaterial(TextureType.Color, 1.5f, 0.98f);
-			//materials.Add(sphere6Material);
-
-			//int width = 50;
-			//int height = 4;
-
-			//for (int i = -width / 2; i < width / 2; i++)
-			//{
-			//	for (int j = -height / 2; j < height / 2; j++)
-			//	{
-			//		Mesh sphere4 = new Sphere(new Vector3(i / 2.0f, j / 2.0f, 6.0f), 0.25f, "Sphere4");
-			//		meshes.Add(sphere4);
-			//		Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-			//		materials.Add(sphere4Material);
-			//	}
-			//}
-
-			//int meshCount = 1000;
-
-			//float min = -12.0f / 12;
-			//float max = 12.0f / 12;
-
-			//float xMin = min;
-			//float xMax = max;
-
-			//float yMin = min / 3;
-			//float yMax = max;
-
-			//float zMin = 10.0f / 12;
-			//float zMax = 20.0f / 12;
-
-			//for (int i = 0; i < meshCount; i++)
-			//{
-			//	Mesh sphere4 = new Sphere(new Vector3(MathHelper.RandomRangeWithStaticSeed(xMin, xMax), MathHelper.RandomRangeWithStaticSeed(yMin, yMax),
-			//		MathHelper.RandomRangeWithStaticSeed(zMin, zMax)), MathHelper.RandomRangeWithStaticSeed(0.01f, 0.02f), "Sphere");
-			//	meshes.Add(sphere4);
-			//	Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-			//	materials.Add(sphere4Material);
-			//}
-
-			AddSphereFigure(5);
-		}
-
-		private void AddSphereFigure(int layers)
-		{
-			Vector3 initialPosition = new Vector3(0.0f, 0.5f, 6.0f);
-			float initialScale = 1.0f;
-
-			Mesh sphere = new Sphere(initialPosition, initialScale, "Sphere");
-			meshes.Add(sphere);
-			Material sphereMaterial = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-			materials.Add(sphereMaterial);
-
-			AddFigureLayer(initialPosition, initialScale, layers, layers);
-		}
-
-		private void AddFigureLayer(Vector3 initialPosition, float initialScale, int layer, int totalLayers, int excludeIndex = -1)
-		{
-			for (int i = 0; i < 6; i++)
-			{
-				if (i == excludeIndex)
-					continue;
-
-				float scale = initialScale / 2.5f;
-				Vector3 position = initialPosition;
-
-				AddSphereToFigure(position, scale, initialScale, i, layer, totalLayers);
-			}
-		}
-
-		private void AddSphereToFigure(Vector3 position, float scale, float previousScale, int positionIndex, int layer, int totalLayers)
-		{
-			int excludeIndex = 0;
-
-			switch (positionIndex)
-			{
-				case 0:
-					position.X += previousScale + scale;
-					excludeIndex = 1;
-					break;
-				case 1:
-					position.X -= previousScale + scale;
-					excludeIndex = 0;
-					break;
-				case 2:
-					position.Y += previousScale + scale;
-					excludeIndex = 3;
-					break;
-				case 3:
-					position.Y -= previousScale + scale;
-					excludeIndex = 2;
-					break;
-				case 4:
-					position.Z += previousScale + scale;
-					excludeIndex = 5;
-					break;
-				case 5:
-					position.Z -= previousScale + scale;
-					excludeIndex = 4;
-					break;
-			}
-
-			Mesh sphereChild = new Sphere(position, scale, "Sphere");
-			meshes.Add(sphereChild);
-			Material sphereChildMaterial = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-			materials.Add(sphereChildMaterial);
-
-			if (layer > 1)
-				AddFigureLayer(position, scale, layer - 1, totalLayers, excludeIndex);
+			Mesh sphere6 = new Sphere(new Vector3(-1.0f, 2.0f, 5.0f), 0.5f, "Sphere6");
+			meshes.Add(sphere6);
+			Material sphere6Material = new ReflectionRefractionMaterial(TextureType.Color, 1.5f, 0.98f);
+			materials.Add(sphere6Material);
 		}
 
 		private void SpawnMap5()
@@ -462,6 +359,117 @@ namespace RayTracerTestBed
 			meshes.Add(sphere2);
 			Material sphere2Material = new ReflectionRefractionMaterial(TextureType.Color, 1.5f);
 			materials.Add(sphere2Material);
+		}
+
+		private void SpawnBVHMap()
+		{
+			//Directional light
+			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), 20.0f, new Vector3(0.0f, 0.5f, 5.0f), 0.5f);
+			//Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f), 2.4f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
+			lights.Add(light);
+
+			Material material = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
+			Vector3 position = new Vector3(-2.5f, 0.5f, 5.0f);
+			float scale = 0.75f;
+			AddSphereFigure(5, material, position, scale);
+
+			Material material2 = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
+			Vector3 position2 = new Vector3(2.5f, 0.5f, 5.0f);
+			float scale2 = 0.75f;
+			AddSphereFigure(5, material2, position2, scale2);
+
+			Material material3 = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
+			Vector3 position3 = new Vector3(0.0f, -1.675f, 5.0f);
+			float scale3 = 0.5f;
+			AddSphereFigure(4, material3, position3, scale3);
+
+			//int meshCount = 1000;
+
+			//float min = -12.0f / 12;
+			//float max = 12.0f / 12;
+
+			//float xMin = min;
+			//float xMax = max;
+
+			//float yMin = min / 3;
+			//float yMax = max;
+
+			//float zMin = 10.0f / 12;
+			//float zMax = 20.0f / 12;
+
+			//for (int i = 0; i < meshCount; i++)
+			//{
+			//	Mesh sphere4 = new Sphere(new Vector3(MathHelper.RandomRangeWithStaticSeed(xMin, xMax), MathHelper.RandomRangeWithStaticSeed(yMin, yMax),
+			//		MathHelper.RandomRangeWithStaticSeed(zMin, zMax)), MathHelper.RandomRangeWithStaticSeed(0.01f, 0.02f), "Sphere");
+			//	meshes.Add(sphere4);
+			//	Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			//	materials.Add(sphere4Material);
+			//}
+
+			//new ReflectionMaterial(TextureType.Color, 0.8f, new Vector3(0.8f));
+		}
+
+		private void AddSphereFigure(int layers, Material material, Vector3 position, float scale)
+		{
+			Mesh sphere = new Sphere(position, scale, "Sphere");
+			meshes.Add(sphere);
+			materials.Add(material);
+
+			AddFigureLayer(material, position, scale, layers, layers);
+		}
+
+		private void AddFigureLayer(Material material, Vector3 initialPosition, float initialScale, int layer, int totalLayers, int excludeIndex = -1)
+		{
+			for (int i = 0; i < 6; i++)
+			{
+				if (i == excludeIndex)
+					continue;
+
+				float scale = initialScale / 2.5f;
+				Vector3 position = initialPosition;
+
+				AddSphereToFigure(material, position, scale, initialScale, i, layer, totalLayers);
+			}
+		}
+
+		private void AddSphereToFigure(Material material, Vector3 position, float scale, float previousScale, int positionIndex, int layer, int totalLayers)
+		{
+			int excludeIndex = 0;
+
+			switch (positionIndex)
+			{
+				case 0:
+					position.X += previousScale + scale;
+					excludeIndex = 1;
+					break;
+				case 1:
+					position.X -= previousScale + scale;
+					excludeIndex = 0;
+					break;
+				case 2:
+					position.Y += previousScale + scale;
+					excludeIndex = 3;
+					break;
+				case 3:
+					position.Y -= previousScale + scale;
+					excludeIndex = 2;
+					break;
+				case 4:
+					position.Z += previousScale + scale;
+					excludeIndex = 5;
+					break;
+				case 5:
+					position.Z -= previousScale + scale;
+					excludeIndex = 4;
+					break;
+			}
+
+			Mesh sphereChild = new Sphere(position, scale, "Sphere");
+			meshes.Add(sphereChild);
+			materials.Add(material);
+
+			if (layer > 1)
+				AddFigureLayer(material, position, scale, layer - 1, totalLayers, excludeIndex);
 		}
 	}
 }

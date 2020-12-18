@@ -22,7 +22,9 @@ namespace RayTracerTestBed
 		public static Stopwatch renderTimeStopwatch = new Stopwatch();
 		public static int numPrimaryRays = 0;
 		public static Int64 numRayTests = 0;
+		public static int numBoxRayTests = 0;
 		public static int numRayIntersections = 0;
+		public static int numBoxRayIntersections = 0;
 		
 		public void Init()
 		{
@@ -31,10 +33,10 @@ namespace RayTracerTestBed
 			settings.height = Config.ASPECT_RATIO_HEIGHT;
 			settings.ui = new UserInterface(settings.width, settings.height);
 			settings.maxDepth = Config.MAX_DEPTH;
-			settings.backgroundColor = Vector3.Zero;
-			settings.scene = new Scene(SceneType.Everything);
+			settings.backgroundColor = new Vector3(0.6f, 0.8f, 1.0f); //Vector3.Zero;
+			settings.scene = new Scene(SceneType.BVH);
 			settings.traceMethod = Config.DEFAULT_TRACE_METHOD;
-			settings.showUI = true;
+			settings.showUI = Config.SHOW_UI_BY_DEFAULT;
 			//settings.antiAliasing = 4; //TODO: Implement anti-aliasing
 
 			//Initialize camera
@@ -278,8 +280,6 @@ namespace RayTracerTestBed
 
 			PrintStats();
 
-			//TODO: For debugging - render bounding box edges in scene as lines (?)
-
 			if (settings.showUI)
 			{
 				DebugUI.Render(settings);
@@ -296,16 +296,18 @@ namespace RayTracerTestBed
 			double renderTime = renderTimeStopwatch.Elapsed.TotalMilliseconds / 1000.0f;
 
 			Console.WriteLine("--------------------");
-			Console.WriteLine("Primitives: " + settings.scene.meshes.Count);
 			Console.WriteLine("Render time: " + renderTime + "\n");
-			Console.WriteLine("Primary rays: " + numPrimaryRays);
-			Console.WriteLine("Intersection tests: " + numRayTests);
-			Console.WriteLine("Ray intersections: " + numRayIntersections + "\n");
-			Console.WriteLine("Average intersection tests per pixel: " + numRayTests / (settings.width * settings.height));
+			Console.WriteLine("Primitives: " + settings.scene.meshes.Count);
+			Console.WriteLine("Primary rays: " + numPrimaryRays + " (" + settings.width + "x" + settings.height + ")\n");
+			Console.WriteLine("Intersection tests: " + numRayTests + " (+" + numBoxRayTests + " box tests)");
+			Console.WriteLine("Intersections: " + numRayIntersections + " (+" + numBoxRayIntersections + " box intersections)");
+			Console.WriteLine("Average intersection tests per pixel: " + (float) numRayTests / numPrimaryRays + " (+" + (float) numBoxRayTests / numPrimaryRays + " box tests)");
 
 			numPrimaryRays = 0;
 			numRayTests = 0;
+			numBoxRayTests = 0;
 			numRayIntersections = 0;
+			numBoxRayIntersections = 0;
 		}
 	}
 }

@@ -7,6 +7,9 @@ namespace RayTracerTestBed
 	{
 		public static Vector3 Trace(int depth, Scene scene, Ray ray, Vector3 backgroundColor)
 		{
+			if (depth == Game.settings.maxDepth)
+				Game.numPrimaryRays++;
+
 			float distance = 0.0f;
 			int? indexOfNearest = null;
 			bool isLight = false;
@@ -17,6 +20,7 @@ namespace RayTracerTestBed
 
 				if (meshIndices.Count > 0)
 				{
+					//TODO: This is a bit ugly right now - should do the same as in RayTracer
 					List<Mesh> meshes = new List<Mesh>();
 
 					for (int i = 0; i < meshIndices.Count; i++)
@@ -26,17 +30,11 @@ namespace RayTracerTestBed
 
 					if (!isLight && indexOfNearest.HasValue)
 						indexOfNearest = meshIndices[indexOfNearest.Value];
-
-					if (depth == Game.settings.maxDepth)
-						Game.numPrimaryRays++;
 				}
 			}
 			else
 			{
 				NearestIntersectionIncludingLights(scene.meshes, scene.lights, ray, out distance, out indexOfNearest, out isLight);
-
-				if (depth == Game.settings.maxDepth)
-					Game.numPrimaryRays++;
 			}
 
 			if (indexOfNearest.HasValue)
