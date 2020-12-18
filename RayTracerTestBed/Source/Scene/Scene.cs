@@ -371,40 +371,17 @@ namespace RayTracerTestBed
 			Material material = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
 			Vector3 position = new Vector3(-2.5f, 0.5f, 5.0f);
 			float scale = 0.75f;
-			AddSphereFigure(7, material, position, scale);
+			AddSphereFigure(5, material, position, scale);
 
 			Material material2 = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
 			Vector3 position2 = new Vector3(2.5f, 0.5f, 5.0f);
 			float scale2 = 0.75f;
-			AddSphereFigure(7, material2, position2, scale2);
+			AddSphereFigure(5, material2, position2, scale2);
 
 			Material material3 = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
 			Vector3 position3 = new Vector3(0.0f, -1.675f, 5.0f);
 			float scale3 = 0.5f;
 			AddSphereFigure(4, material3, position3, scale3);
-
-			//int meshCount = 1000;
-
-			//float min = -12.0f / 12;
-			//float max = 12.0f / 12;
-
-			//float xMin = min;
-			//float xMax = max;
-
-			//float yMin = min / 3;
-			//float yMax = max;
-
-			//float zMin = 10.0f / 12;
-			//float zMax = 20.0f / 12;
-
-			//for (int i = 0; i < meshCount; i++)
-			//{
-			//	Mesh sphere4 = new Sphere(new Vector3(MathHelper.RandomRangeWithStaticSeed(xMin, xMax), MathHelper.RandomRangeWithStaticSeed(yMin, yMax),
-			//		MathHelper.RandomRangeWithStaticSeed(zMin, zMax)), MathHelper.RandomRangeWithStaticSeed(0.01f, 0.02f), "Sphere");
-			//	meshes.Add(sphere4);
-			//	Material sphere4Material = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
-			//	materials.Add(sphere4Material);
-			//}
 
 			//new ReflectionMaterial(TextureType.Color, 0.8f, new Vector3(0.8f));
 		}

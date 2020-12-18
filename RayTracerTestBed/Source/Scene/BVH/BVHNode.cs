@@ -81,55 +81,34 @@ namespace RayTracerTestBed
 			for (int i = 0; i < meshIndices.Count; i++)
 			{
 				Mesh mesh = allMeshes[meshIndices[i]];
+				Vector3 center = mesh.Center();
 
 				for (int j = 0; j < splitPlaneCount; j++)
 				{
 					float xSplitInterval = j * xBinSize;
-					float xPosition = mesh.Center().X;
-
-					if (j == splitPlaneCount - 1)
-					{
-						if (xPosition >= bounds.minX + xSplitInterval && xPosition < bounds.minX + xSplitInterval + xBinSize + Renderer.EPSILON)
-							xBins[j].Add(meshIndices[i]);
-					}
-					else
-					{
-						if (xPosition >= bounds.minX + xSplitInterval && xPosition < bounds.minX + xSplitInterval + xBinSize)
-							xBins[j].Add(meshIndices[i]);
-					}
+					float xPosition = center.X;
 
 					float ySplitInterval = j * yBinSize;
-					float yPosition = mesh.Center().Y;
-
-					if (j == splitPlaneCount - 1)
-					{
-						if (yPosition >= bounds.minY + ySplitInterval && yPosition < bounds.minY + ySplitInterval + yBinSize + Renderer.EPSILON)
-							yBins[j].Add(meshIndices[i]);
-					}
-					else
-					{
-						if (yPosition >= bounds.minY + ySplitInterval && yPosition < bounds.minY + ySplitInterval + yBinSize)
-							yBins[j].Add(meshIndices[i]);
-					}
+					float yPosition = center.Y;
 
 					float zSplitInterval = j * zBinSize;
-					float zPosition = mesh.Center().Z;
+					float zPosition = center.Z;
 
+					float epsilon = 0.0f;
 					if (j == splitPlaneCount - 1)
-					{
-						if (zPosition >= bounds.minZ + zSplitInterval && zPosition < bounds.minZ + zSplitInterval + zBinSize + Renderer.EPSILON)
-							zBins[j].Add(meshIndices[i]);
-					}
-					else
-					{
-						if (zPosition >= bounds.minZ + zSplitInterval && zPosition < bounds.minZ + zSplitInterval + zBinSize)
-							zBins[j].Add(meshIndices[i]);
-					}
+						epsilon = Renderer.EPSILON;
+
+					if (xPosition >= bounds.minX + xSplitInterval && xPosition < bounds.minX + xSplitInterval + xBinSize + epsilon)
+						xBins[j].Add(meshIndices[i]);
+					if (yPosition >= bounds.minY + ySplitInterval && yPosition < bounds.minY + ySplitInterval + yBinSize + epsilon)
+						yBins[j].Add(meshIndices[i]);
+					if (zPosition >= bounds.minZ + zSplitInterval && zPosition < bounds.minZ + zSplitInterval + zBinSize + epsilon)
+						zBins[j].Add(meshIndices[i]);
 				}
 			}
 		}
 
-		private float SplitCost(int splitAxis, int binIndex, List<Mesh> allMeshes, List<List<int>> xBins, List<List<int>> yBins, List<List<int>> zBins,out List<int> leftSide, out List<int> rightSide)
+		private float SplitCost(int splitAxis, int binIndex, List<Mesh> allMeshes, List<List<int>> xBins, List<List<int>> yBins, List<List<int>> zBins, out List<int> leftSide, out List<int> rightSide)
 		{
 			leftSide = new List<int>();
 			rightSide = new List<int>();
