@@ -16,5 +16,6 @@
 		//BVH
 		public const bool USE_BVH = true;
 		public const int BINNING_SPLIT_PLANE_COUNT = 8;
+		public const bool USE_ALTERNATIVE_BINNING_METHOD = true;
 	}
 }

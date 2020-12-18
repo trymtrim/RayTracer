@@ -13,7 +13,8 @@ namespace RayTracerTestBed
 		Everything,
 		Mirrors,
 		Room,
-		BVH
+		BVH,
+		BVHReflection
 	}
 
 	class Scene
@@ -61,6 +62,9 @@ namespace RayTracerTestBed
 					break;
 				case SceneType.BVH:
 					SpawnBVHMapDiffuse();
+					break;
+				case SceneType.BVHReflection:
+					SpawnBVHMapReflection();
 					break;
 			}
 
@@ -371,17 +375,17 @@ namespace RayTracerTestBed
 			Material material = new DiffuseMaterial(TextureType.Color, new Vector3(0.75f, 0.25f, 0.25f));
 			Vector3 position = new Vector3(-2.5f, 0.5f, 5.0f);
 			float scale = 0.75f;
-			AddSphereFigure(8, material, position, scale);
+			AddSphereFigure(5, material, position, scale);
 
 			Material material2 = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
 			Vector3 position2 = new Vector3(2.5f, 0.5f, 5.0f);
 			float scale2 = 0.75f;
-			AddSphereFigure(8, material2, position2, scale2);
+			AddSphereFigure(5, material2, position2, scale2);
 
 			Material material3 = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.75f, 0.25f));
 			Vector3 position3 = new Vector3(0.0f, -1.675f, 5.0f);
 			float scale3 = 0.5f;
-			AddSphereFigure(5, material3, position3, scale3);
+			AddSphereFigure(4, material3, position3, scale3);
 		}
 
 		private void SpawnBVHMapReflection()

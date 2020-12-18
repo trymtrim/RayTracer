@@ -16,7 +16,7 @@ namespace RayTracerTestBed
 			this.meshIndices = meshIndices;
 
 			bounds = ConstructBoundingBox(meshIndices, allMeshes);
-			Subdivide(allMeshes);
+			SubdivideWithAlternativeBinningMethod(allMeshes);
 			RecalculateBoundingBoxWithFullExtents(meshIndices, allMeshes);
 		}
 
@@ -151,6 +151,102 @@ namespace RayTracerTestBed
 
 						break;
 					}
+			}
+
+			float aLeft = ConstructBoundingBox(leftSide, allMeshes).SurfaceArea();
+			float nLeft = leftSide.Count;
+			float aRight = ConstructBoundingBox(rightSide, allMeshes).SurfaceArea();
+			float nRight = rightSide.Count;
+
+			return aLeft * nLeft + aRight * nRight;
+		}
+
+		private void SubdivideWithAlternativeBinningMethod(List<Mesh> allMeshes)
+		{
+			List<int> leftSide = new List<int>();
+			List<int> rightSide = new List<int>();
+			float minimalSplitCost = float.MaxValue;
+
+			float boxWidth = Math.Abs(bounds.minX - bounds.maxX);
+			float boxHeight = Math.Abs(bounds.minY - bounds.maxY);
+			float boxForward = Math.Abs(bounds.minZ - bounds.maxZ);
+
+			int splitBins = Config.BINNING_SPLIT_PLANE_COUNT;
+
+			for (int i = 0; i < 3; i++) //0 = X, 1 = Y, 2 = Z
+			{
+				float binSize = i == 0 ? boxWidth / splitBins : (i == 1 ? boxHeight / splitBins : boxForward / splitBins);
+
+				for (int j = 0; j < splitBins; j++)
+				{
+					float splitInterval = j * binSize;
+					float splitCost = SplitCostWithAlternativeBinningMethod(i, splitInterval, allMeshes, out List<int> leftSideMeshes, out List<int> rightSideMeshes);
+
+					if (splitCost < minimalSplitCost)
+					{
+						leftSide = leftSideMeshes;
+						rightSide = rightSideMeshes;
+
+						minimalSplitCost = splitCost;
+					}
+				}
+			}
+
+			if (minimalSplitCost >= bounds.SurfaceArea() * meshIndices.Count)
+			{
+				isLeaf = true;
+				return;
+			}
+
+			leftChildNode = new BVHNode(leftSide, allMeshes);
+			rightChildNode = new BVHNode(rightSide, allMeshes);
+		}
+
+		private float SplitCostWithAlternativeBinningMethod(int splitAxis, float splitInterval, List<Mesh> allMeshes, out List<int> leftSide, out List<int> rightSide)
+		{
+			leftSide = new List<int>();
+			rightSide = new List<int>();
+
+			for (int i = 0; i < meshIndices.Count; i++)
+			{
+				Mesh mesh = allMeshes[meshIndices[i]];
+
+				switch (splitAxis)
+				{
+					case 0: //Split vertically
+						{
+							float xSplitPlanePosition = bounds.minX + splitInterval;
+
+							if (mesh.Center().X < xSplitPlanePosition)
+								leftSide.Add(meshIndices[i]);
+							else
+								rightSide.Add(meshIndices[i]);
+
+							break;
+						}
+					case 1: //Split horizontally
+						{
+							float ySplitPlanePosition = bounds.minY + splitInterval;
+
+							if (mesh.Center().Y < ySplitPlanePosition)
+								leftSide.Add(meshIndices[i]);
+							else
+								rightSide.Add(meshIndices[i]);
+
+							break;
+						}
+					case 2: //Split vertically 90 degrees
+						{
+							float zSplitPlanePosition = bounds.minZ + splitInterval;
+
+							if (mesh.Center().Z < zSplitPlanePosition)
+								leftSide.Add(meshIndices[i]);
+							else
+								rightSide.Add(meshIndices[i]);
+
+							break;
+						}
+				}
 			}
 
 			float aLeft = ConstructBoundingBox(leftSide, allMeshes).SurfaceArea();
