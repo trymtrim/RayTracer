@@ -60,7 +60,7 @@ namespace RayTracerTestBed
 					SpawnMap6();
 					break;
 				case SceneType.BVH:
-					SpawnBVHMap();
+					SpawnBVHMapDiffuse();
 					break;
 			}
 
@@ -361,24 +361,47 @@ namespace RayTracerTestBed
 			materials.Add(sphere2Material);
 		}
 
-		private void SpawnBVHMap()
+		private void SpawnBVHMapDiffuse()
 		{
 			//Directional light
 			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), 20.0f, new Vector3(0.0f, 0.5f, 5.0f), 0.5f);
 			//Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f), 2.4f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
 			lights.Add(light);
 
-			Material material = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
+			Material material = new DiffuseMaterial(TextureType.Color, new Vector3(0.75f, 0.25f, 0.25f));
+			Vector3 position = new Vector3(-2.5f, 0.5f, 5.0f);
+			float scale = 0.75f;
+			AddSphereFigure(8, material, position, scale);
+
+			Material material2 = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.25f, 0.75f));
+			Vector3 position2 = new Vector3(2.5f, 0.5f, 5.0f);
+			float scale2 = 0.75f;
+			AddSphereFigure(8, material2, position2, scale2);
+
+			Material material3 = new DiffuseMaterial(TextureType.Color, new Vector3(0.25f, 0.75f, 0.25f));
+			Vector3 position3 = new Vector3(0.0f, -1.675f, 5.0f);
+			float scale3 = 0.5f;
+			AddSphereFigure(5, material3, position3, scale3);
+		}
+
+		private void SpawnBVHMapReflection()
+		{
+			//Directional light
+			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), 20.0f, new Vector3(0.0f, 0.5f, 5.0f), 0.5f);
+			//Light light = new Light(LightType.Directional, new Vector3(1.0f, 1.0f, 1.0f), 2.4f, null, null, new Vector3(1.0f, 0.8f, 1.0f));
+			lights.Add(light);
+
+			Material material = new ReflectionMaterial(TextureType.Color, 0.8f, new Vector3(0.8f));
 			Vector3 position = new Vector3(-2.5f, 0.5f, 5.0f);
 			float scale = 0.75f;
 			AddSphereFigure(5, material, position, scale);
 
-			Material material2 = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
+			Material material2 = new ReflectionMaterial(TextureType.Color, 0.8f, new Vector3(0.8f));
 			Vector3 position2 = new Vector3(2.5f, 0.5f, 5.0f);
 			float scale2 = 0.75f;
 			AddSphereFigure(5, material2, position2, scale2);
 
-			Material material3 = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
+			Material material3 = new ReflectionMaterial(TextureType.Color, 0.8f, new Vector3(0.8f));
 			Vector3 position3 = new Vector3(0.0f, -1.675f, 5.0f);
 			float scale3 = 0.5f;
 			AddSphereFigure(4, material3, position3, scale3);
