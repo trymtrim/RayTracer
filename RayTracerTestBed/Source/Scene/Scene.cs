@@ -371,12 +371,12 @@ namespace RayTracerTestBed
 			Material material = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
 			Vector3 position = new Vector3(-2.5f, 0.5f, 5.0f);
 			float scale = 0.75f;
-			AddSphereFigure(5, material, position, scale);
+			AddSphereFigure(7, material, position, scale);
 
 			Material material2 = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
 			Vector3 position2 = new Vector3(2.5f, 0.5f, 5.0f);
 			float scale2 = 0.75f;
-			AddSphereFigure(5, material2, position2, scale2);
+			AddSphereFigure(7, material2, position2, scale2);
 
 			Material material3 = new DiffuseMaterial(TextureType.Color, new Vector3(0.8f));
 			Vector3 position3 = new Vector3(0.0f, -1.675f, 5.0f);

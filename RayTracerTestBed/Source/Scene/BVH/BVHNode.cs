@@ -37,8 +37,6 @@ namespace RayTracerTestBed
 
 			for (int i = 0; i < 3; i++) //0 = X, 1 = Y, 2 = Z
 			{
-				float binSize = i == 0 ? boxWidth / splitPlaneCount : (i == 1 ? boxHeight / splitPlaneCount : boxForward / splitPlaneCount);
-
 				for (int j = 0; j < splitPlaneCount; j++)
 				{
 					float splitCost = SplitCost(i, j, allMeshes, xBins, yBins, zBins, out List<int> leftSideMeshes, out List<int> rightSideMeshes);
