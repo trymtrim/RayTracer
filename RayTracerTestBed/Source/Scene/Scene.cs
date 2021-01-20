@@ -313,7 +313,7 @@ namespace RayTracerTestBed
 			skybox = null;
 
 			//Point light
-			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), 20.0f, new Vector3(0.0f, -1.45f, 2.0f), 0.5f);
+			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), 20.0f, new Vector3(0.0f, -1.45f, 2.0f), 0.5f); //new Vector3(0.0f, -0.1f, 2.0f)
 			lights.Add(light);
 
 			//Floor

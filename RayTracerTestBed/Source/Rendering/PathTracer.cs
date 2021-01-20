@@ -215,7 +215,7 @@ namespace RayTracerTestBed
 			}
 		}
 
-		private static Vector3 DirectIllumination(int depth, Vector3 color, Vector3 intersection, Ray ray, Vector3 normal, Scene scene, Vector3 backgroundColor)
+		private static Vector3 DirectIllumination(int depth, Vector3 color, Vector3 intersection, Ray ray, Vector3 normal, Scene scene, Vector3 backgroundColor) //Indirect
 		{
 			Vector3 newNormal = normal;
 			if (Vector3.Dot(normal, ray.direction) > 0.0f)

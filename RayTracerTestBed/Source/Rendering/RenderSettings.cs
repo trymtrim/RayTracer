@@ -5,7 +5,8 @@ namespace RayTracerTestBed
 	enum TraceMethod
 	{
 		WhittedRayTracing,
-		PathTracing
+		PathTracing,
+		WhittedRayTracingWithPhotonMapping
 	}
 
 	struct RenderSettings

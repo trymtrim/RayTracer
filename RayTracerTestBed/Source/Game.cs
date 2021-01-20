@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using OpenTK;
 using OpenTK.Input;
@@ -25,7 +26,7 @@ namespace RayTracerTestBed
 		public static int numBoxRayTests = 0;
 		public static int numRayIntersections = 0;
 		public static int numBoxRayIntersections = 0;
-		
+
 		public void Init()
 		{
 			//Initialize settings
@@ -33,19 +34,21 @@ namespace RayTracerTestBed
 			settings.height = Config.ASPECT_RATIO_HEIGHT;
 			settings.ui = new UserInterface(settings.width, settings.height);
 			settings.maxDepth = Config.MAX_DEPTH;
-			settings.backgroundColor = new Vector3(0.6f, 0.8f, 1.0f); //Vector3.Zero;
-			settings.scene = new Scene(SceneType.BVH);
+			settings.backgroundColor = Vector3.Zero; //new Vector3(0.6f, 0.8f, 1.0f);
+			settings.scene = new Scene(SceneType.Room);
 			settings.traceMethod = Config.DEFAULT_TRACE_METHOD;
 			settings.showUI = Config.SHOW_UI_BY_DEFAULT;
-			//settings.antiAliasing = 4; //TODO: Implement anti-aliasing
 
 			//Initialize camera
-			Vector3 cameraPosition = new Vector3(0.0f, 0.5f, -1.75f); //new Vector3(0.0f, 0.0f, 0.0f); //(0.0f, 0.0f, -2.0f) //new Vector3(0.0f, 0.5f, -1.75f)
+			Vector3 cameraPosition = new Vector3(0.0f, 0.5f, -1.75f); //(0.0f, 0.0f, 0.0f); //(0.0f, 0.0f, -2.0f)
 			Vector3 cameraDirection = new Vector3(0.0f, 0.0f, 1.0f);
 			_camera = new Camera(Config.FOV, cameraPosition, cameraDirection);
 
 			//Initialize debug window
 			DebugUI.Initialize();
+
+			//Initialize photon map
+			InitializePhotonMap();
 
 			//Start render frame stopwatch
 			renderTimeStopwatch.Start();
@@ -193,6 +196,21 @@ namespace RayTracerTestBed
 					settings.scene = new Scene(SceneType.Skybox);
 					break;
 			}
+
+			//Initialize photon map
+			InitializePhotonMap();
+		}
+
+		private static void InitializePhotonMap()
+		{
+			PhotonMapping.ClearPhotonMap();
+
+			for (int i = 0; i < settings.scene.meshes.Count; i++)
+				PhotonMapping.globalPhotonMap.Add(new List<Photon>());
+			for (int i = 0; i < settings.scene.meshes.Count; i++)
+				PhotonMapping.causticsPhotonMap.Add(new List<Photon>());
+
+			PhotonMapping.GeneratePhotons(settings);
 		}
 
 		public static void ChangeTraceMethod()
@@ -203,6 +221,9 @@ namespace RayTracerTestBed
 					settings.traceMethod = TraceMethod.PathTracing;
 					break;
 				case TraceMethod.PathTracing:
+					settings.traceMethod = TraceMethod.WhittedRayTracingWithPhotonMapping;
+					break;
+				case TraceMethod.WhittedRayTracingWithPhotonMapping:
 					settings.traceMethod = TraceMethod.WhittedRayTracing;
 					break;
 			}
@@ -301,7 +322,7 @@ namespace RayTracerTestBed
 			Console.WriteLine("Primary rays: " + numPrimaryRays + " (" + settings.width + "x" + settings.height + ")\n");
 			Console.WriteLine("Intersection tests: " + numRayTests + " (+" + numBoxRayTests + " box tests)");
 			Console.WriteLine("Intersections: " + numRayIntersections + " (+" + numBoxRayIntersections + " box intersections)");
-			Console.WriteLine("Average intersection tests per pixel: " + (float) numRayTests / numPrimaryRays + " (+" + (float) numBoxRayTests / numPrimaryRays + " box tests)");
+			Console.WriteLine("Average intersection tests per pixel: " + (float)numRayTests / numPrimaryRays + " (+" + (float)numBoxRayTests / numPrimaryRays + " box tests)");
 
 			numPrimaryRays = 0;
 			numRayTests = 0;

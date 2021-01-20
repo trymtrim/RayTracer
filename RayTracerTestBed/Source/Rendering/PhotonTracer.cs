@@ -1,10 +1,10 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.Collections.Generic;
-using OpenTK;
 
 namespace RayTracerTestBed
 {
-	class RayTracer
+	class PhotonTracer
 	{
 		public static Vector3 Trace(int depth, Scene scene, Ray ray, Vector3 backgroundColor)
 		{
@@ -57,9 +57,9 @@ namespace RayTracerTestBed
 
 				var result = Vector3.Zero;
 
-				//Diffuse
+				//Global illumination
 				if (diffuse > 0.0f)
-					result += diffuse * DirectIllumination(scene, intersection, normal);
+					result = diffuse * PhotonMapping.GatherPhotonEnergy(intersection, normal, index);
 
 				if (mesh.isSkyboxMesh)
 					return material.Color(mesh, ray, distance, intersection);
@@ -73,7 +73,7 @@ namespace RayTracerTestBed
 					{
 						case MaterialType.Diffuse:
 							{
-								result = color * result;
+								//result = color * result;
 								break;
 							}
 						case MaterialType.Reflection:
@@ -85,24 +85,7 @@ namespace RayTracerTestBed
 								Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
 								result += reflection * reflectionColor;
 
-								result = color * result;
-								break;
-							}
-						case MaterialType.Refraction:
-							{
-								float kr = Renderer.Fresnel(ray.direction, normal, ior);
-
-								if (kr < 1.0f) //TODO: Not sure if this is needed anymore
-								{
-									Vector3 refractionRayOrigin = outside ? intersection - bias : intersection + bias;
-									Vector3 refractionDirection = Renderer.Refract(ray.direction, normal, ior).Normalized();
-									Ray refractionRay = new Ray(refractionRayOrigin, refractionDirection);
-
-									Vector3 refractionColor = Trace(depth - 1, scene, refractionRay, backgroundColor);
-									result += refraction * refractionColor;
-								}
-
-								result = color * result;
+								//result = color * result;
 								break;
 							}
 						case MaterialType.Reflection_Refraction:
@@ -128,18 +111,7 @@ namespace RayTracerTestBed
 								Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
 								result += (reflectionColor * kr + refractionColor * (1.0f - kr)) * reflection;
 
-								result = color * result;
-								break;
-							}
-						case MaterialType.Transparent:
-							{
-								Vector3 transparentRayOrigin = outside ? intersection - bias : intersection + bias;
-								Vector3 transparentDirection = ray.direction;
-								Ray transparentRay = new Ray(transparentRayOrigin, transparentDirection);
-
-								Vector3 transparentColor = Trace(depth - 1, scene, transparentRay, backgroundColor);
-
-								result = color * result * (1.0f - transparency) + transparentColor * transparency;
+								//result = color * result;
 								break;
 							}
 					}
@@ -218,100 +190,6 @@ namespace RayTracerTestBed
 					}
 				}
 			}
-		}
-
-		private static Vector3 DirectIllumination(Scene scene, Vector3 point, Vector3 normal)
-		{
-			Vector3 color = Vector3.Zero;
-			float brightness = 1.0f;
-
-			foreach (var light in scene.lights)
-			{
-				if (light.direction.HasValue)
-				{
-					var dir = light.direction.Value;
-
-					var ray = new Ray(point - dir * Renderer.EPSILON, -dir);
-
-					var distance = light.mesh.Intersect(ray);
-
-					if (distance.HasValue)
-					{
-						float outDistance = 0.0f;
-						int? outIndexOfNearest;
-
-						if (Config.USE_BVH)
-						{
-							List<int> meshIndices = scene.bvh.Traverse(ray, false);
-
-							if (meshIndices.Count > 0)
-							{
-								Game.numRayTests += meshIndices.Count;
-
-								NearestIntersection(scene, meshIndices, ray, out outDistance, out outIndexOfNearest);
-
-								if (outIndexOfNearest.HasValue)
-									outIndexOfNearest = meshIndices[outIndexOfNearest.Value];
-							}
-						}
-						else
-						{
-							Game.numRayTests += scene.meshes.Count;
-
-							NearestIntersection(scene.meshes, ray, out outDistance, out outIndexOfNearest);
-						}
-
-						if (outDistance >= distance - Renderer.EPSILON)
-						{
-							var directionFactor = Vector3.Dot(-dir, normal); //Photon smearing
-							color += light.color * directionFactor;
-							brightness = light.brightness;
-						}
-					}
-				}
-				else
-				{
-					var lightCenter = light.mesh.Center();
-					var path = point - lightCenter;
-					var distance = path.Length;
-					var pathNormalized = path / distance;
-
-					var ray = new Ray(lightCenter, pathNormalized);
-
-					float outDistance = 0.0f;
-					int? outIndexOfNearest;
-
-					if (Config.USE_BVH)
-					{
-						List<int> meshIndices = scene.bvh.Traverse(ray, false);
-
-						if (meshIndices.Count > 0)
-						{
-							Game.numRayTests += meshIndices.Count;
-
-							NearestIntersection(scene, meshIndices, ray, out outDistance, out outIndexOfNearest);
-
-							if (outIndexOfNearest.HasValue)
-								outIndexOfNearest = meshIndices[outIndexOfNearest.Value];
-						}
-					}
-					else
-					{
-						NearestIntersection(scene.meshes, ray, out outDistance, out outIndexOfNearest);
-					}
-
-					if (outDistance >= distance - Renderer.EPSILON)
-					{
-						var directionFactor = Vector3.Dot(-pathNormalized, normal); //Photon smearing
-						var distanceDiv = (float)Math.Pow(distance, 2.0f);
-
-						color += light.color * light.mesh.Radius() * directionFactor / distanceDiv;
-						brightness = light.brightness;
-					}
-				}
-			}
-
-			return color * brightness;
 		}
 	}
 }

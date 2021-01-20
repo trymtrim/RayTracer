@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Rendering\Photon.cs" />
+    <Compile Include="Source\Rendering\PhotonMapping.cs" />
+    <Compile Include="Source\Rendering\PhotonTracer.cs" />
     <Compile Include="Source\Rendering\RayTracer.cs" />
     <Compile Include="Source\Scene\BVH\AABB.cs" />
     <Compile Include="Source\Scene\BVH\BVHNode.cs" />

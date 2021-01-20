@@ -47,3 +47,13 @@ D:\UU\Advanced_Graphics\Assignment1\RayTracer\RayTracerTestBed_New\bin\Release\R
 D:\UU\Advanced_Graphics\Assignment1\RayTracer\RayTracerTestBed_New\bin\Release\OpenTK.dll
 D:\UU\Advanced_Graphics\Assignment1\RayTracer\RayTracerTestBed_New\bin\Release\OpenTK.dll.config
 D:\UU\Advanced_Graphics\Assignment1\RayTracer\RayTracerTestBed_New\obj\Release\RayTracerTestBed.csproj.CopyComplete
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\bin\Release\RayTracerTestBed.exe.config
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\bin\Release\RayTracerTestBed.exe
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\bin\Release\RayTracerTestBed.pdb
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\bin\Release\OpenTK.dll
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\bin\Release\OpenTK.dll.config
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTracerTestBed.csprojAssemblyReference.cache
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTracerTestBed.csproj.CoreCompileInputs.cache
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTracerTestBed.csproj.CopyComplete
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTracerTestBed.exe
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTracerTestBed.pdb
