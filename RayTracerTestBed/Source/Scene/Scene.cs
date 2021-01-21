@@ -313,7 +313,7 @@ namespace RayTracerTestBed
 			skybox = null;
 
 			//Point light
-			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), 20.0f, new Vector3(0.0f, -0.5f, 2.0f), 0.5f); //new Vector3(0.0f, -0.1f, 2.0f) //-1.45f
+			Light light = new Light(LightType.Point, new Vector3(0.7f, 0.7f, 0.7f), 20.0f, new Vector3(0.0f, -1.45f, 2.0f), 0.5f); //new Vector3(0.0f, -0.1f, 2.0f) //-1.45f
 			lights.Add(light);
 
 			//Floor
@@ -355,7 +355,7 @@ namespace RayTracerTestBed
 			//Mirror ball
 			Mesh sphere1 = new Sphere(new Vector3(-0.9f, 1.35f, 3.0f), 0.65f, "Mirror Ball");
 			meshes.Add(sphere1);
-			Material sphere1Material = new ReflectionMaterial(TextureType.Color, 0.98f);
+			Material sphere1Material = new ReflectionMaterial(TextureType.Color, 1.0f);
 			materials.Add(sphere1Material);
 
 			//Glass ball

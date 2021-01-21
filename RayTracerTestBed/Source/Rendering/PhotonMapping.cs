@@ -37,6 +37,8 @@ namespace RayTracerTestBed
 			//Global photons
 			for (int i = 0; i < numberOfPhotons; i++)
 			{
+				//TODO: Make this random evenly distributed
+
 				//Random direction from point light
 				Vector3 randomDirection = new Vector3(MathHelper.RandomRangeWithStaticSeed(-1.0f, 1.0f),
 					MathHelper.RandomRangeWithStaticSeed(-1.0f, 1.0f), MathHelper.RandomRangeWithStaticSeed(-1.0f, 1.0f));
@@ -80,7 +82,7 @@ namespace RayTracerTestBed
 
 			if (depth > 1)
 			{
-				//TODO: Handle as mentioned in the paper
+				//TODO: Add russian roulette to determine if the photon should be reflected, transmitted or absorbed
 				switch (material.materialType)
 				{
 					case MaterialType.Diffuse:
@@ -112,12 +114,19 @@ namespace RayTracerTestBed
 		{
 			Vector3 shadow = new Vector3(-0.25f); //-0.25f
 			Vector3 tPoint = intersection;
-			Vector3 bumpedPoint = tPoint * (1.0f + Renderer.EPSILON);
+			Vector3 bumpedPoint = tPoint;// * (1.0f + Renderer.EPSILON);
+
+			//Vector3 direction = scene.lights[0].mesh.Center() - tPoint;
 
 			Ray shadowRay = new Ray(bumpedPoint, ray.direction);
 			RayTracer.NearestIntersection(scene.meshes, shadowRay, out float distance, out int? indexOfNearest);
 
-			if (!indexOfNearest.HasValue)
+			//Vector3 v1 = tPoint;
+			//Vector3 v2 = scene.lights[0].mesh.Center();
+
+			//float distanceToLight = (float)Math.Sqrt((v2.X - v1.X) * (v2.X - v1.X) + (v2.Y - v1.Y) * (v2.Y - v1.Y) + (v2.Z - v1.Z) * (v2.Z - v1.Z));
+
+			if (!indexOfNearest.HasValue)// || distance < distanceToLight)
 				return;
 
 			Photon photon;
