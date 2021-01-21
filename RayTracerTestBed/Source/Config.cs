@@ -10,7 +10,7 @@
 		public const int PATH_TRACING_SAMPLES = 10;
 
 		//Default states
-		public const TraceMethod DEFAULT_TRACE_METHOD = TraceMethod.WhittedRayTracingWithPhotonMapping; //Rename to PhotonTracing?
+		public const TraceMethod DEFAULT_TRACE_METHOD = TraceMethod.PhotonTracing;
 		public const bool SHOW_UI_BY_DEFAULT = true;
 
 		//BVH
@@ -20,8 +20,9 @@
 
 		//Photon mapping
 		public const bool RENDER_PHOTON_MAP = false;
-		public const int PHOTON_COUNT = 2000; //Millions?
-		public const int MAX_PHOTON_DEPTH = 3; //3
-		public const float MAX_PHOTON_SEARCH_RADIUS = 2.0f; //TODO: Use this
+		public const int PHOTON_COUNT = 20000; //Millions?
+		public const int CAUSTICS_PHOTON_COUNT = 4000;
+		public const int MAX_PHOTON_DEPTH = 3;
+		public const float MAX_PHOTON_SEARCH_RADIUS = 0.1f;
 	}
 }

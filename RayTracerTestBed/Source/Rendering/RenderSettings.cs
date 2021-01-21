@@ -6,7 +6,7 @@ namespace RayTracerTestBed
 	{
 		WhittedRayTracing,
 		PathTracing,
-		WhittedRayTracingWithPhotonMapping
+		PhotonTracing
 	}
 
 	struct RenderSettings

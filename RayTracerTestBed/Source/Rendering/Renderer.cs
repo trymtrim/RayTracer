@@ -14,11 +14,11 @@ namespace RayTracerTestBed
 		public static void Render(RenderSettings settings, Camera camera)
 		{
 			//Photon mapping first pass here - storing the photons in a photon map
-			if (settings.traceMethod == TraceMethod.WhittedRayTracingWithPhotonMapping)
+			if (settings.traceMethod == TraceMethod.PhotonTracing)
 			{
 				if (Config.RENDER_PHOTON_MAP)
 				{
-					screen.UpdateSurface(PhotonMapping.PhotonMap(settings, camera));
+					screen.UpdateSurface(PhotonMapping.PhotonMapRender(settings, camera));
 					return;
 				}
 			}
@@ -68,7 +68,7 @@ namespace RayTracerTestBed
 								colorVector /= sampleCount;
 								break;
 							}
-						case TraceMethod.WhittedRayTracingWithPhotonMapping:
+						case TraceMethod.PhotonTracing:
 							{
 								//TODO: Implement proper photon mapping second pass?
 								colorVector = PhotonTracer.Trace(settings.maxDepth, settings.scene, ray, settings.backgroundColor);

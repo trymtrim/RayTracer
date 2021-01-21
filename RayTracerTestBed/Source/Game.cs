@@ -221,9 +221,9 @@ namespace RayTracerTestBed
 					settings.traceMethod = TraceMethod.PathTracing;
 					break;
 				case TraceMethod.PathTracing:
-					settings.traceMethod = TraceMethod.WhittedRayTracingWithPhotonMapping;
+					settings.traceMethod = TraceMethod.PhotonTracing;
 					break;
-				case TraceMethod.WhittedRayTracingWithPhotonMapping:
+				case TraceMethod.PhotonTracing:
 					settings.traceMethod = TraceMethod.WhittedRayTracing;
 					break;
 			}

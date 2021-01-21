@@ -51,7 +51,6 @@ namespace RayTracerTestBed
 				var reflection = material.reflection;
 				var refraction = material.refraction;
 				var ior = material.ior;
-				var transparency = material.transparency;
 
 				var diffuse = 1.0f - reflection - refraction;
 
@@ -73,7 +72,7 @@ namespace RayTracerTestBed
 					{
 						case MaterialType.Diffuse:
 							{
-								//result = color * result;
+								result = color * result;
 								break;
 							}
 						case MaterialType.Reflection:
@@ -85,7 +84,7 @@ namespace RayTracerTestBed
 								Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
 								result += reflection * reflectionColor;
 
-								//result = color * result;
+								result = color * result;
 								break;
 							}
 						case MaterialType.Reflection_Refraction:
@@ -111,7 +110,7 @@ namespace RayTracerTestBed
 								Vector3 reflectionColor = Trace(depth - 1, scene, reflectionRay, backgroundColor);
 								result += (reflectionColor * kr + refractionColor * (1.0f - kr)) * reflection;
 
-								//result = color * result;
+								result = color * result;
 								break;
 							}
 					}
