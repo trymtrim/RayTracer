@@ -28,9 +28,12 @@
 }
 
 /*
+TRY IMPLEMENTING LINES 62-160 IN GITHUB BELOW 
+
 TODO:
 - Uniform distribution of photons emitted from the point light
 - Use russian roulette to determine if the photon should be reflected, transmitted or absorbed (based on the material's diffuse reflection, specular reflection, absorption/transmission etc)
+(Try using fresnel for the trasmittance part?)
 - Trace photons based on whether they should be reflected, transmitted or absorbed
 - Only store photons when they hit diffuse surfaces (not glass and mirror), including when they are absorbed (if that surface is diffuse)
 //- Use standard ray tracing for glass and mirror
@@ -53,6 +56,7 @@ Notes:
 - Use distribution ray tracing? Significantly fewer photons are necessary when a distribution ray tracer is used to evaluate the first diffuse reflection (page 38/43)
 - Use disc instead of sphere/radius to locate photons?
 - Ward’s irradiance gradient caching scheme?
+- Phong?
 - https://www.cs.princeton.edu/courses/archive/fall18/cos526/papers/jensen01.pdf
 - https://github.com/ReillyBova/Global-Illumination
 
