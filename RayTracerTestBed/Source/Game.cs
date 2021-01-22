@@ -208,7 +208,7 @@ namespace RayTracerTestBed
 			for (int i = 0; i < settings.scene.meshes.Count; i++)
 				PhotonMapping.globalPhotonMap.Add(new List<Photon>());
 			for (int i = 0; i < settings.scene.meshes.Count; i++)
-				PhotonMapping.causticsPhotonMap.Add(new List<Photon>());
+				PhotonMapping.causticPhotonMap.Add(new List<Photon>());
 
 			PhotonMapping.GeneratePhotons(settings);
 		}

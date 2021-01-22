@@ -20,15 +20,16 @@
 
 		//Photon mapping
 		public const bool RENDER_PHOTON_MAP = false;
-		public const int PHOTON_COUNT = 20000; //Millions?
-		public const int CAUSTICS_PHOTON_COUNT = 4000;
-		public const int MAX_PHOTON_DEPTH = 3;
+		public const int PHOTON_COUNT = 400000; //Millions?
+		public const int CAUSTIC_PHOTON_COUNT = 00000;
+		public const int MAX_PHOTON_DEPTH = 5;
 		public const float MAX_PHOTON_SEARCH_RADIUS = 0.1f;
 	}
 }
 
 /*
 TRY IMPLEMENTING LINES 62-160 IN GITHUB BELOW 
+Try doing each process separately (step by step)
 
 TODO:
 - Uniform distribution of photons emitted from the point light
