@@ -14,7 +14,9 @@ namespace RayTracerTestBed
 		public static List<List<Photon>> causticPhotonMap;
 
 		private static Photon photon;
+
 		private static bool _caustic = false;
+		private static bool _shadowPhoton = false;
 
 		public static void ClearPhotonMap()
 		{
@@ -71,70 +73,71 @@ namespace RayTracerTestBed
 		{
 			RayTracer.NearestIntersection(scene.meshes, photonRay, out float distance, out int? indexOfNearest);
 
-			Vector3 intersection;
-			Vector3 normal;
-			Material material;
-			Mesh mesh;
-
-			if (indexOfNearest.HasValue)
-			{
-				intersection = photonRay.At(distance);
-				normal = scene.meshes[indexOfNearest.Value].Normal(intersection);
-				material = scene.materials[indexOfNearest.Value];
-				mesh = scene.meshes[indexOfNearest.Value];
-
-				//Initialize photon
-				if (depth == Config.MAX_PHOTON_DEPTH)
-				{
-					_caustic = false; //Reset value
-
-					photon.power = Vector3.One; //Photon color
-				}
-
-				photon.L = photonRay.direction; //Incident direction
-				photon.position = intersection; //World space position of the photon hit
-
-				//globalPhotonMap[indexOfNearest.Value].Add(photon); //Store photon
-
-				//Shadow photon
-				//if (depth < Config.MAX_PHOTON_DEPTH)
-				//AddShadowPhoton(photonRay, scene, intersection);
-			}
-			else
+			if (!indexOfNearest.HasValue)
 				return;
 
-			Vector3 color = material.Color(mesh, photonRay, distance, intersection);
+			Vector3 intersection = photonRay.At(distance);
+			Vector3 normal = scene.meshes[indexOfNearest.Value].Normal(intersection);
+			int index = indexOfNearest.Value;
+			Material material = scene.materials[index];
+			//Mesh mesh = scene.meshes[index];
 
-			if (depth > 1)
+			//if (_shadowPhoton && _caustic)
+			//	Console.Write("YOO");
+
+			photon.L = photonRay.direction; //Incident direction
+			photon.position = intersection; //World space position of the photon hit
+			
+			//Initialize photon
+			if (depth == Config.MAX_PHOTON_DEPTH && !_shadowPhoton)
 			{
-				//TODO: Add russian roulette to determine if the photon should be reflected, transmitted or absorbed
-				switch (material.materialType)
+				//_caustic = false; //Reset value //TODO: Uncomment this?
+
+				photon.power = Vector3.One; //Photon color
+			}
+			else if (_shadowPhoton) //Shadow photon (indirect illumination)
+			{
+				if (material.materialType == MaterialType.Diffuse)
 				{
-					case MaterialType.Diffuse:
+					photon.power = new Vector3(-0.15f); //Photon color
+
+					globalPhotonMap[index].Add(photon); //TODO: This might not work with diffuse spheres right now as the shadow photon will stop inside the sphere (?)
+				}
+				else
+				{
+					photonRay.origin = intersection + (photonRay.direction * Renderer.EPSILON);
+					TracePhoton(0, scene, photonRay);
+				}
+
+				_shadowPhoton = false;
+				return;
+			}
+
+			if (depth == 0)
+				return;
+
+			//Vector3 color = material.Color(mesh, photonRay, distance, intersection);
+
+			//TODO: Add russian roulette to determine if the photon should be reflected, transmitted or absorbed
+			switch (material.materialType)
+			{
+				case MaterialType.Diffuse:
+					{
+						if (_caustic)
 						{
-							if (causticTracing && depth == Config.MAX_PHOTON_DEPTH)
-								return;
+							causticPhotonMap[indexOfNearest.Value].Add(photon); //Store photon
+							_caustic = false;
+						}
+						else if (causticTracing)
+						{
+							_caustic = false;
+							return;
+						}
+						else
+						{
+							globalPhotonMap[indexOfNearest.Value].Add(photon); //Store photon
 
-							photon.power = color;
-
-							if (_caustic)
-							{
-								causticPhotonMap[indexOfNearest.Value].Add(photon); //Store photon
-								_caustic = false; //Reset value
-							}
-							else
-							{
-								globalPhotonMap[indexOfNearest.Value].Add(photon); //Store photon
-								//AddShadowPhoton(photonRay, scene, intersection);
-							}
-
-							Vector3 newNormal = normal;
-							if (Vector3.Dot(normal, photonRay.direction) > 0.0f)
-								newNormal = -normal;
-
-							var direction = RandomOnHemisphere(newNormal);
-							Ray newRay = new Ray(intersection + direction * Renderer.EPSILON, direction);
-							TracePhoton(depth - 1, scene, newRay);// * Vector3.Dot(newNormal, direction);
+							//TODO: Randomly absorb or bounce (Russian roulette)
 
 							//Bounce the photon
 							//bool outside = Vector3.Dot(photonRay.direction, normal) < 0.0f;
@@ -144,94 +147,98 @@ namespace RayTracerTestBed
 							//Vector3 reflectionDirection = Renderer.Reflect(photonRay.direction, normal).Normalized();
 							//Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
 
-							//TracePhoton(depth - 1, scene, reflectionRay); //Trace it to the next location
-							break;
+							//TracePhoton(depth - 1, scene, reflectionRay);
+
+							Vector3 newNormal = normal;
+							if (Vector3.Dot(normal, photonRay.direction) > 0.0f)
+								newNormal = -normal;
+
+							var direction = RandomOnHemisphere(newNormal);
+							Ray newRay = new Ray(intersection + direction * Renderer.EPSILON, direction);
+							TracePhoton(depth - 1, scene, newRay);// * Vector3.Dot(newNormal, direction);
 						}
-					case MaterialType.Reflection:
+
+						//TODO: Try switching between the two bounce methods^
+
+						break;
+					}
+				case MaterialType.Reflection:
+					{
+						if (causticTracing)
+							_caustic = true;
+						else
 						{
-							//if (causticTracing)
-							//	_caustic = true;
+							//Shoot shadow photon ray
+							_shadowPhoton = true;
 
-							bool outside = Vector3.Dot(photonRay.direction, normal) < 0.0f;
-							Vector3 bias = Renderer.EPSILON * normal;
+							Vector3 shadowRayOrigin = intersection + (photonRay.direction * Renderer.EPSILON);
+							Ray shadowRay = new Ray(shadowRayOrigin, photonRay.direction);
+							TracePhoton(0, scene, shadowRay);
 
-							Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
+							_shadowPhoton = false;
+						}
+
+						bool outside = Vector3.Dot(photonRay.direction, normal) < 0.0f;
+						Vector3 bias = Renderer.EPSILON * normal;
+
+						Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
+						Vector3 reflectionDirection = Renderer.Reflect(photonRay.direction, normal).Normalized();
+						Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
+
+						TracePhoton(depth - 1, scene, reflectionRay, causticTracing);
+
+						break;
+					}
+				case MaterialType.Reflection_Refraction:
+					{
+						if (causticTracing)
+							_caustic = true;
+						else
+						{
+							//Shoot shadow photon ray
+							_shadowPhoton = true;
+
+							Vector3 shadowRayOrigin = intersection + (photonRay.direction * Renderer.EPSILON);
+							Ray shadowRay = new Ray(shadowRayOrigin, photonRay.direction);
+							TracePhoton(0, scene, shadowRay);
+
+							_shadowPhoton = false;
+						}
+
+						var ior = material.ior;
+						bool outside = Vector3.Dot(photonRay.direction, normal) < 0.0f;
+						Vector3 bias = Renderer.EPSILON * normal;
+
+						float kr = Renderer.Fresnel(photonRay.direction, normal, ior);
+
+						//Compute refraction if it is not a case of total internal reflection
+						if (kr < 1.0f)
+						{
+							Vector3 refractionRayOrigin = outside ? intersection - bias : intersection + bias;
+							Vector3 refractionDirection = Renderer.Refract(photonRay.direction, normal, ior).Normalized();
+							Ray refractionRay = new Ray(refractionRayOrigin, refractionDirection);
+
+							TracePhoton(depth - 1, scene, refractionRay, causticTracing);
+						}
+						else
+						{
 							Vector3 reflectionDirection = Renderer.Reflect(photonRay.direction, normal).Normalized();
+							Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
 							Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
 
-							//TracePhoton(depth - 1, scene, reflectionRay, causticTracing);
-
-							break;
+							TracePhoton(depth - 1, scene, reflectionRay, causticTracing);
 						}
-					case MaterialType.Reflection_Refraction:
-						{
-							if (causticTracing)
-								_caustic = true;
-
-							var ior = material.ior;
-							bool outside = Vector3.Dot(photonRay.direction, normal) < 0.0f;
-							Vector3 bias = Renderer.EPSILON * normal;
-
-							float kr = Renderer.Fresnel(photonRay.direction, normal, ior);
-
-							//Compute refraction if it is not a case of total internal reflection
-							if (kr < 1.0f)
-							{
-								Vector3 refractionRayOrigin = outside ? intersection - bias : intersection + bias;
-								Vector3 refractionDirection = Renderer.Refract(photonRay.direction, normal, ior).Normalized();
-								Ray refractionRay = new Ray(refractionRayOrigin, refractionDirection);
-
-								TracePhoton(depth - 1, scene, refractionRay, causticTracing);
-							}
-							else
-							{
-								Vector3 reflectionDirection = Renderer.Reflect(photonRay.direction, normal).Normalized();
-								Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
-								Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
-
-								TracePhoton(depth - 1, scene, reflectionRay, causticTracing);
-							}
-							break;
-						}
-				}
+						break;
+					}
 			}
-		}
-
-		private static void AddShadowPhoton(Ray ray, Scene scene, Vector3 intersection)
-		{
-			Vector3 shadow = new Vector3(-0.25f); //-0.25f
-			Vector3 tPoint = intersection;
-			//Vector3 bias = Renderer.EPSILON * normal;
-			Vector3 bumpedPoint = tPoint;// * (1.0f + Renderer.EPSILON);
-
-			//Vector3 direction = scene.lights[0].mesh.Center() - tPoint;
-
-			Ray shadowRay = new Ray(bumpedPoint, ray.direction);
-			RayTracer.NearestIntersection(scene.meshes, shadowRay, out float distance, out int? indexOfNearest);
-
-			//Vector3 v1 = tPoint;
-			//Vector3 v2 = scene.lights[0].mesh.Center();
-
-			//float distanceToLight = (float)Math.Sqrt((v2.X - v1.X) * (v2.X - v1.X) + (v2.Y - v1.Y) * (v2.Y - v1.Y) + (v2.Z - v1.Z) * (v2.Z - v1.Z));
-
-			if (!indexOfNearest.HasValue)// || distance < distanceToLight)
-				return;
-
-			Photon photon;
-			photon.L = shadowRay.direction; //Incident direction
-			photon.position = shadowRay.At(distance); //World space position of the photon hit
-			photon.power = shadow; //Photon color
-
-			globalPhotonMap[indexOfNearest.Value].Add(photon); //Store shadow photon
 		}
 
 		public static Vector3 GatherPhotonEnergy(Vector3 position, Vector3 normal, int index)
 		{
-			Vector3 energy = Vector3.Zero;
+			Vector3 globalEnergy = Vector3.Zero;
 			Vector3 causticEnergy = Vector3.Zero;
 
 			var photons = globalPhotonMap[index];
-
 			for (int i = 0; i < photons.Count; i++)
 			{
 				Photon photon = photons[i];
@@ -240,9 +247,9 @@ namespace RayTracerTestBed
 				if (distance < Config.MAX_PHOTON_SEARCH_RADIUS)
 				{
 					float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
-					//weight *= (1.0f - (float)Math.Sqrt(distance));// / (Config.PHOTON_COUNT / 50.0f); //REMINDER: This is probably incorrect //TODO: Scale this by some factor?
+					weight *= (1.0f - (float)Math.Sqrt(distance));// / (Config.PHOTON_COUNT / 50.0f); //REMINDER: This is probably incorrect //TODO: Scale this by some factor?
 
-					energy += photon.power; //new Vector3(weight);
+					globalEnergy += photon.power * weight; //new Vector3(weight);
 				}
 			}
 
@@ -253,16 +260,25 @@ namespace RayTracerTestBed
 				Photon photon = photons[i];
 				float distance = (position - photon.position).LengthSquared;
 
-				if (distance < Config.MAX_PHOTON_SEARCH_RADIUS / 100.0f)
+				if (distance < Config.MAX_PHOTON_SEARCH_RADIUS / 200.0f)
 				{
 					float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
-					weight *= (1.0f - (float)Math.Sqrt(distance)) / (Config.PHOTON_COUNT / 50.0f); //REMINDER: This is probably incorrect //TODO: Scale this by some factor?
+					Vector3 weight2 = photon.power * (1.0f - (float)Math.Sqrt(distance));// / (Config.PHOTON_COUNT / 50.0f); //REMINDER: This is probably incorrect //TODO: Scale this by some factor?
 
-					causticEnergy += photon.power; //* 2; //* 3.0f; //Use weight?
+					//TODO: Not sure if should use weight or photon.power
+					causticEnergy += weight2; //photon.power;
 				}
 			}
 
-			return energy / globalPhotonMap[index].Count * 50.0f;// + causticEnergy / causticPhotonMap[index].Count * 50.0f;// + causticEnergy / (causticPhotonMap.Count / 0.1f);// / (2.0f / globalPhotonMap.Count);
+			Vector3 result = Vector3.Zero;
+
+			if (Config.PHOTON_COUNT > 0)
+				result += globalEnergy / (Config.PHOTON_COUNT * 0.0125f);
+			if (Config.CAUSTIC_PHOTON_COUNT > 0)
+				result += causticEnergy / (Config.CAUSTIC_PHOTON_COUNT * 0.00003f);
+
+			//TODO: Make dynamic according to Config.MAX_PHOTON_SEARCH_RADIUS
+			return result;
 		}
 
 		public static Bitmap PhotonMapRender(RenderSettings settings, Camera camera)

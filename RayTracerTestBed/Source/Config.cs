@@ -20,10 +20,10 @@
 
 		//Photon mapping
 		public const bool RENDER_PHOTON_MAP = false;
-		public const int PHOTON_COUNT = 400000; //Millions?
-		public const int CAUSTIC_PHOTON_COUNT = 00000;
-		public const int MAX_PHOTON_DEPTH = 5;
-		public const float MAX_PHOTON_SEARCH_RADIUS = 0.1f;
+		public const int PHOTON_COUNT = 50000; //Millions?
+		public const int CAUSTIC_PHOTON_COUNT = 50000000;
+		public const int MAX_PHOTON_DEPTH = 4;
+		public const float MAX_PHOTON_SEARCH_RADIUS = 0.25f;
 	}
 }
 
