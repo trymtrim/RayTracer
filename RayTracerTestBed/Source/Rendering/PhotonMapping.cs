@@ -27,6 +27,18 @@ namespace RayTracerTestBed
 				_causticPhotonMap.Add(new KdTree<float, Photon>(3, new FloatMath()));
 
 			GeneratePhotons(settings);
+
+			for (int i = 0; i < _globalPhotonMap.Count; i++)
+			{
+				if (_globalPhotonMap[i].Count > 0)
+					_globalPhotonMap[i].Balance();
+			}
+
+			for (int i = 0; i < _causticPhotonMap.Count; i++)
+			{
+				if (_causticPhotonMap[i].Count > 0)
+					_causticPhotonMap[i].Balance();
+			}
 		}
 
 		private static void ClearPhotonMaps()
