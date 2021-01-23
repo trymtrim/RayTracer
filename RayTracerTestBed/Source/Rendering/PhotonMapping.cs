@@ -2,29 +2,40 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using KdTree;
+using KdTree.Math;
 
 namespace RayTracerTestBed
 {
 	class PhotonMapping
 	{
-		public static List<List<Photon>> globalPhotonMap;
-		public static List<List<Photon>> causticPhotonMap;
+		private static List<KdTree<float, Photon>> _globalPhotonMap;
+		private static List<KdTree<float, Photon>> _causticPhotonMap;
 
-		private static Photon photon;
+		private static Photon _photon;
 
 		private static bool _caustic = false;
 		private static bool _shadowPhoton = false;
 
-		public static void ClearPhotonMap()
+		public static void InitializePhotonMap(RenderSettings settings)
 		{
-			globalPhotonMap = new List<List<Photon>>();
-			causticPhotonMap = new List<List<Photon>>();
+			ClearPhotonMaps();
+
+			for (int i = 0; i < settings.scene.meshes.Count; i++)
+				_globalPhotonMap.Add(new KdTree<float, Photon>(3, new FloatMath()));
+			for (int i = 0; i < settings.scene.meshes.Count; i++)
+				_causticPhotonMap.Add(new KdTree<float, Photon>(3, new FloatMath()));
+
+			GeneratePhotons(settings);
 		}
 
-		public static void GeneratePhotons(RenderSettings settings)
+		private static void ClearPhotonMaps()
+		{
+			_globalPhotonMap = new List<KdTree<float, Photon>>();
+			_causticPhotonMap = new List<KdTree<float, Photon>>();
+		}
+
+		private static void GeneratePhotons(RenderSettings settings)
 		{
 			MathHelper.ResetStaticRandomSeed();
 
@@ -80,28 +91,25 @@ namespace RayTracerTestBed
 			Vector3 normal = scene.meshes[indexOfNearest.Value].Normal(intersection);
 			int index = indexOfNearest.Value;
 			Material material = scene.materials[index];
-			//Mesh mesh = scene.meshes[index];
 
-			//if (_shadowPhoton && _caustic)
-			//	Console.Write("YOO");
+			_photon.L = photonRay.direction; //Incident direction
+			_photon.position = intersection; //World space position of the photon hit
 
-			photon.L = photonRay.direction; //Incident direction
-			photon.position = intersection; //World space position of the photon hit
-			
 			//Initialize photon
 			if (depth == Config.MAX_PHOTON_DEPTH && !_shadowPhoton)
 			{
 				//_caustic = false; //Reset value //TODO: Uncomment this?
 
-				photon.power = Vector3.One; //Photon color
+				_photon.power = Vector3.One; //Photon color
 			}
 			else if (_shadowPhoton) //Shadow photon (indirect illumination)
 			{
 				if (material.materialType == MaterialType.Diffuse)
 				{
-					photon.power = new Vector3(-0.15f); //Photon color
+					_photon.power = new Vector3(-0.15f); //Photon color
 
-					globalPhotonMap[index].Add(photon); //TODO: This might not work with diffuse spheres right now as the shadow photon will stop inside the sphere (?)
+					//TODO: This might not work with diffuse spheres right now as the shadow photon will stop inside the sphere (?)
+					_globalPhotonMap[index].Add(new[] { _photon.position.X, _photon.position.Y, _photon.position.Z }, _photon); //Store photon
 				}
 				else
 				{
@@ -125,17 +133,18 @@ namespace RayTracerTestBed
 					{
 						if (_caustic)
 						{
-							causticPhotonMap[indexOfNearest.Value].Add(photon); //Store photon
+							_causticPhotonMap[index].Add(new[] { _photon.position.X, _photon.position.Y, _photon.position.Z }, _photon); //Store photon
 							_caustic = false;
 						}
-						else if (causticTracing)
+						else if (causticTracing) //TODO: Not sure if this should be here
 						{
 							_caustic = false;
 							return;
 						}
 						else
 						{
-							globalPhotonMap[indexOfNearest.Value].Add(photon); //Store photon
+							//TODO: This might not work with diffuse spheres right now as the shadow photon will stop inside the sphere (?)
+							_globalPhotonMap[index].Add(new[] { _photon.position.X, _photon.position.Y, _photon.position.Z }, _photon); //Store photon
 
 							//TODO: Randomly absorb or bounce (Russian roulette)
 
@@ -156,9 +165,9 @@ namespace RayTracerTestBed
 							var direction = RandomOnHemisphere(newNormal);
 							Ray newRay = new Ray(intersection + direction * Renderer.EPSILON, direction);
 							TracePhoton(depth - 1, scene, newRay);// * Vector3.Dot(newNormal, direction);
-						}
 
-						//TODO: Try switching between the two bounce methods^
+							//TODO: Try switching between the two bounce methods^
+						}
 
 						break;
 					}
@@ -238,36 +247,34 @@ namespace RayTracerTestBed
 			Vector3 globalEnergy = Vector3.Zero;
 			Vector3 causticEnergy = Vector3.Zero;
 
-			var photons = globalPhotonMap[index];
-			for (int i = 0; i < photons.Count; i++)
+			var photonTree = _globalPhotonMap[index].RadialSearch(new[] { position.X, position.Y, position.Z }, Config.MAX_PHOTON_SEARCH_RADIUS);
+			var photonEnumerator = photonTree.GetEnumerator();
+
+			while (photonEnumerator.MoveNext())
 			{
-				Photon photon = photons[i];
+				var photon = ((KdTreeNode<float, Photon>)photonEnumerator.Current).Value;
+
 				float distance = (position - photon.position).LengthSquared;
+				float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
+				weight *= 1.0f - (float)Math.Sqrt(distance);
 
-				if (distance < Config.MAX_PHOTON_SEARCH_RADIUS)
-				{
-					float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
-					weight *= (1.0f - (float)Math.Sqrt(distance));// / (Config.PHOTON_COUNT / 50.0f); //REMINDER: This is probably incorrect //TODO: Scale this by some factor?
-
-					globalEnergy += photon.power * weight; //new Vector3(weight);
-				}
+				//TODO: Not sure if weight should be used
+				globalEnergy += photon.power * weight;
 			}
 
-			photons = causticPhotonMap[index];
+			photonTree = _causticPhotonMap[index].RadialSearch(new[] { position.X, position.Y, position.Z }, Config.MAX_PHOTON_SEARCH_RADIUS / 20.0f);
+			photonEnumerator = photonTree.GetEnumerator();
 
-			for (int i = 0; i < photons.Count; i++)
+			while (photonEnumerator.MoveNext())
 			{
-				Photon photon = photons[i];
+				var photon = ((KdTreeNode<float, Photon>)photonEnumerator.Current).Value;
+
 				float distance = (position - photon.position).LengthSquared;
+				//float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
+				Vector3 weight2 = photon.power * (1.0f - (float)Math.Sqrt(distance));
 
-				if (distance < Config.MAX_PHOTON_SEARCH_RADIUS / 200.0f)
-				{
-					float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
-					Vector3 weight2 = photon.power * (1.0f - (float)Math.Sqrt(distance));// / (Config.PHOTON_COUNT / 50.0f); //REMINDER: This is probably incorrect //TODO: Scale this by some factor?
-
-					//TODO: Not sure if should use weight or photon.power
-					causticEnergy += weight2; //photon.power;
-				}
+				//TODO: Not sure if weight or photon.power should be used
+				causticEnergy += weight2; //photon.power;
 			}
 
 			Vector3 result = Vector3.Zero;
@@ -285,10 +292,13 @@ namespace RayTracerTestBed
 		{
 			Bitmap bitmap = new Bitmap(settings.width, settings.height);
 
-			foreach (var photons in globalPhotonMap)
+			for (int i = 0; i < _globalPhotonMap.Count; i++)
 			{
-				foreach (Photon photon in photons)
+				var photonEnumerator = _globalPhotonMap[i].GetEnumerator();
+				while (photonEnumerator.MoveNext())
 				{
+					var photon = ((KdTreeNode<float, Photon>)photonEnumerator.Current).Value;
+
 					Vector3 position = photon.position;
 
 					position -= camera.position * camera.direction * 2.0f; //TODO: Handle this properly
@@ -304,10 +314,13 @@ namespace RayTracerTestBed
 				}
 			}
 
-			foreach (var photons in causticPhotonMap)
+			for (int i = 0; i < _causticPhotonMap.Count; i++)
 			{
-				foreach (Photon photon in photons)
+				var photonEnumerator = _causticPhotonMap[i].GetEnumerator();
+				while (photonEnumerator.MoveNext())
 				{
+					var photon = ((KdTreeNode<float, Photon>)photonEnumerator.Current).Value;
+
 					Vector3 position = photon.position;
 
 					position -= camera.position * camera.direction * 2.0f; //TODO: Handle this properly
@@ -328,6 +341,7 @@ namespace RayTracerTestBed
 
 		private static Vector3 RandomOnHemisphere(Vector3 normal)
 		{
+			//TODO: Use RandomRangeWithStaticSeed instead?
 			var x = MathHelper.RandomRange(-1.0f, 1.0f);
 			var y = MathHelper.RandomRange(-1.0f, 1.0f);
 			var z = MathHelper.RandomRange(-1.0f, 1.0f);

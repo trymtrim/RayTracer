@@ -1,5 +1,4 @@
 ﻿using OpenTK;
-using System;
 using System.Collections.Generic;
 
 namespace RayTracerTestBed
@@ -56,7 +55,7 @@ namespace RayTracerTestBed
 
 				var result = Vector3.Zero;
 
-				//Global illumination
+				//Photon map
 				if (diffuse > 0.0f)
 					result = diffuse * PhotonMapping.GatherPhotonEnergy(intersection, normal, index);
 

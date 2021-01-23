@@ -203,14 +203,7 @@ namespace RayTracerTestBed
 
 		private static void InitializePhotonMap()
 		{
-			PhotonMapping.ClearPhotonMap();
-
-			for (int i = 0; i < settings.scene.meshes.Count; i++)
-				PhotonMapping.globalPhotonMap.Add(new List<Photon>());
-			for (int i = 0; i < settings.scene.meshes.Count; i++)
-				PhotonMapping.causticPhotonMap.Add(new List<Photon>());
-
-			PhotonMapping.GeneratePhotons(settings);
+			PhotonMapping.InitializePhotonMap(settings);
 		}
 
 		public static void ChangeTraceMethod()

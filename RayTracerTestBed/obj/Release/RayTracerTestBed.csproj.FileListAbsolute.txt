@@ -57,3 +57,4 @@ D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTr
 D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTracerTestBed.csproj.CopyComplete
 D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTracerTestBed.exe
 D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\obj\Release\RayTracerTestBed.pdb
+D:\UU\Advanced_Graphics\Assignments\RayTracer\RayTracerTestBed\bin\Release\KdTreeLib.dll
