@@ -118,7 +118,7 @@ namespace RayTracerTestBed
 			{
 				if (material.materialType == MaterialType.Diffuse)
 				{
-					_photon.power = new Vector3(-0.15f); //Photon color
+					_photon.power = new Vector3(-Config.SHADOW_STRENGTH); //Photon color
 
 					//TODO: This might not work with diffuse spheres right now as the shadow photon will stop inside the sphere (?)
 					_globalPhotonMap[index].Add(new[] { _photon.position.X, _photon.position.Y, _photon.position.Z }, _photon); //Store photon
@@ -274,7 +274,7 @@ namespace RayTracerTestBed
 				globalEnergy += photon.power * weight;
 			}
 
-			photonTree = _causticPhotonMap[index].RadialSearch(new[] { position.X, position.Y, position.Z }, Config.MAX_PHOTON_SEARCH_RADIUS / 20.0f);
+			photonTree = _causticPhotonMap[index].RadialSearch(new[] { position.X, position.Y, position.Z }, Config.MAX_PHOTON_SEARCH_RADIUS / 10.0f);
 			photonEnumerator = photonTree.GetEnumerator();
 
 			while (photonEnumerator.MoveNext())
@@ -294,7 +294,7 @@ namespace RayTracerTestBed
 			if (Config.PHOTON_COUNT > 0)
 				result += globalEnergy / (Config.PHOTON_COUNT * 0.0125f);
 			if (Config.CAUSTIC_PHOTON_COUNT > 0)
-				result += causticEnergy / (Config.CAUSTIC_PHOTON_COUNT * 0.00003f);
+				result += causticEnergy / (Config.CAUSTIC_PHOTON_COUNT * 0.00006f);
 
 			//TODO: Make dynamic according to Config.MAX_PHOTON_SEARCH_RADIUS
 			return result;

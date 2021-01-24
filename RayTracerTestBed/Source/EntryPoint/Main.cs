@@ -65,6 +65,8 @@ namespace RayTracerTestBed
 		{
 			_game.Tick();
 
+			_game.Render();
+
 			GL.BindTexture(TextureTarget.Texture2D, _screenID);
 			GL.TexImage2D(TextureTarget.Texture2D,
 						   0,
@@ -86,8 +88,7 @@ namespace RayTracerTestBed
 			GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(1.0f, 1.0f);
 			GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-1.0f, 1.0f);
 			GL.End();
-
-			_game.Render();
+			
 			SwapBuffers();
 		}
 
