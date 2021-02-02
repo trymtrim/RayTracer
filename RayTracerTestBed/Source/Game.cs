@@ -292,7 +292,8 @@ namespace RayTracerTestBed
 
 			Renderer.Render(settings, _camera);
 
-			PrintStats();
+			if (Config.USE_BVH)
+				PrintStats();
 
 			if (settings.showUI)
 			{

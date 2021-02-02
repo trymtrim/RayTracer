@@ -54,11 +54,11 @@ namespace RayTracerTestBed
 			for (int i = 0; i < settings.scene.lights.Count; i++)
 			{
 				Light light = settings.scene.lights[i];
-				GeneratePhotonsFromLight(settings, light.mesh.Center(), light.brightness);
+				GeneratePhotonsFromLight(settings, light.mesh.Center());
 			}
 		}
 
-		private static void GeneratePhotonsFromLight(RenderSettings settings, Vector3 position, float intensity)
+		private static void GeneratePhotonsFromLight(RenderSettings settings, Vector3 position)
 		{
 			int numberOfGlobalPhotons = Config.PHOTON_COUNT;
 			int numberOfcausticPhotons = Config.CAUSTIC_PHOTON_COUNT;
@@ -110,15 +110,15 @@ namespace RayTracerTestBed
 			//Initialize photon
 			if (depth == Config.MAX_PHOTON_DEPTH && !_shadowPhoton)
 			{
-				//_caustic = false; //Reset value //TODO: Uncomment this?
+				_caustic = false;
 
-				_photon.power = Vector3.One; //Photon color
+				_photon.power = Vector3.One;
 			}
 			else if (_shadowPhoton) //Shadow photon (indirect illumination)
 			{
 				if (material.materialType == MaterialType.Diffuse)
 				{
-					_photon.power = new Vector3(-Config.SHADOW_STRENGTH); //Photon color
+					_photon.power = new Vector3(-Config.SHADOW_STRENGTH);
 
 					//TODO: This might not work with diffuse spheres right now as the shadow photon will stop inside the sphere (?)
 					_globalPhotonMap[index].Add(new[] { _photon.position.X, _photon.position.Y, _photon.position.Z }, _photon); //Store photon
@@ -136,9 +136,6 @@ namespace RayTracerTestBed
 			if (depth == 0)
 				return;
 
-			//Vector3 color = material.Color(mesh, photonRay, distance, intersection);
-
-			//TODO: Add russian roulette to determine if the photon should be reflected, transmitted or absorbed
 			switch (material.materialType)
 			{
 				case MaterialType.Diffuse:
@@ -148,37 +145,28 @@ namespace RayTracerTestBed
 							_causticPhotonMap[index].Add(new[] { _photon.position.X, _photon.position.Y, _photon.position.Z }, _photon); //Store photon
 							_caustic = false;
 						}
-						else if (causticTracing) //TODO: Not sure if this should be here
+						else if (causticTracing)
 						{
 							_caustic = false;
 							return;
 						}
 						else
 						{
+							_photon.power *= 1.0f / (float)Math.Sqrt(Config.MAX_PHOTON_DEPTH - depth + 1.0f);
+							
 							//TODO: This might not work with diffuse spheres right now as the shadow photon will stop inside the sphere (?)
 							_globalPhotonMap[index].Add(new[] { _photon.position.X, _photon.position.Y, _photon.position.Z }, _photon); //Store photon
 
-							//TODO: Randomly absorb or bounce (Russian roulette)
+							//TODO: Randomly absorb or bounce (Russian roulette)?
 
 							//Bounce the photon
-							//bool outside = Vector3.Dot(photonRay.direction, normal) < 0.0f;
-							//Vector3 bias = Renderer.EPSILON * normal;
-
-							//Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
-							//Vector3 reflectionDirection = Renderer.Reflect(photonRay.direction, normal).Normalized();
-							//Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
-
-							//TracePhoton(depth - 1, scene, reflectionRay);
-
 							Vector3 newNormal = normal;
 							if (Vector3.Dot(normal, photonRay.direction) > 0.0f)
 								newNormal = -normal;
 
-							var direction = RandomOnHemisphere(newNormal);
+							var direction = MathHelper.RandomOnHemisphereWithStaticSeed(newNormal);
 							Ray newRay = new Ray(intersection + direction * Renderer.EPSILON, direction);
-							TracePhoton(depth - 1, scene, newRay);// * Vector3.Dot(newNormal, direction);
-
-							//TODO: Try switching between the two bounce methods^
+							TracePhoton(depth - 1, scene, newRay);
 						}
 
 						break;
@@ -189,7 +177,7 @@ namespace RayTracerTestBed
 							_caustic = true;
 						else
 						{
-							//Shoot shadow photon ray
+							//Shadow photon ray (currently only doing it on reflection and refraction objects, since the scene only consists of those)
 							_shadowPhoton = true;
 
 							Vector3 shadowRayOrigin = intersection + (photonRay.direction * Renderer.EPSILON);
@@ -216,7 +204,7 @@ namespace RayTracerTestBed
 							_caustic = true;
 						else
 						{
-							//Shoot shadow photon ray
+							//Shadow photon ray (currently only doing it on reflection and refraction objects, since the scene only consists of those)
 							_shadowPhoton = true;
 
 							Vector3 shadowRayOrigin = intersection + (photonRay.direction * Renderer.EPSILON);
@@ -243,8 +231,8 @@ namespace RayTracerTestBed
 						}
 						else
 						{
-							Vector3 reflectionDirection = Renderer.Reflect(photonRay.direction, normal).Normalized();
 							Vector3 reflectionRayOrigin = outside ? intersection + bias : intersection - bias;
+							Vector3 reflectionDirection = Renderer.Reflect(photonRay.direction, normal).Normalized();
 							Ray reflectionRay = new Ray(reflectionRayOrigin, reflectionDirection);
 
 							TracePhoton(depth - 1, scene, reflectionRay, causticTracing);
@@ -270,7 +258,6 @@ namespace RayTracerTestBed
 				float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
 				weight *= 1.0f - (float)Math.Sqrt(distance);
 
-				//TODO: Not sure if weight should be used
 				globalEnergy += photon.power * weight;
 			}
 
@@ -282,21 +269,19 @@ namespace RayTracerTestBed
 				var photon = ((KdTreeNode<float, Photon>)photonEnumerator.Current).Value;
 
 				float distance = (position - photon.position).LengthSquared;
-				//float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
-				Vector3 weight2 = photon.power * (1.0f - (float)Math.Sqrt(distance));
+				float weight = Math.Max(0.0f, -Vector3.Dot(normal, photon.L));
+				weight *= 1.0f - (float)Math.Sqrt(distance);
 
-				//TODO: Not sure if weight or photon.power should be used
-				causticEnergy += weight2; //photon.power;
+				causticEnergy += photon.power * weight;
 			}
 
 			Vector3 result = Vector3.Zero;
 
 			if (Config.PHOTON_COUNT > 0)
-				result += globalEnergy / (Config.PHOTON_COUNT * 0.0125f);
+				result += globalEnergy / (Config.PHOTON_COUNT * 0.0075f); //Not sure about this magic number here, but this works for now
 			if (Config.CAUSTIC_PHOTON_COUNT > 0)
-				result += causticEnergy / (Config.CAUSTIC_PHOTON_COUNT * 0.00006f);
+				result += causticEnergy / (Config.CAUSTIC_PHOTON_COUNT * 0.00006f); //Not sure about this magic number here, but this works for now
 
-			//TODO: Make dynamic according to Config.MAX_PHOTON_SEARCH_RADIUS
 			return result;
 		}
 
@@ -349,21 +334,6 @@ namespace RayTracerTestBed
 			}
 
 			return bitmap;
-		}
-
-		private static Vector3 RandomOnHemisphere(Vector3 normal)
-		{
-			//TODO: Use RandomRangeWithStaticSeed instead?
-			var x = MathHelper.RandomRange(-1.0f, 1.0f);
-			var y = MathHelper.RandomRange(-1.0f, 1.0f);
-			var z = MathHelper.RandomRange(-1.0f, 1.0f);
-
-			var v = new Vector3(x, y, z).Normalized();
-
-			if (Vector3.Dot(v, normal) < 0.0f)
-				return -v;
-
-			return v;
 		}
 	}
 }

@@ -37,5 +37,20 @@ namespace RayTracerTestBed
 		{
 			staticSeedRandom = new Random(1000);
 		}
+
+		public static Vector3 RandomOnHemisphereWithStaticSeed(Vector3 normal)
+		{
+			//TODO: Use RandomRangeWithStaticSeed instead?
+			var x = RandomRangeWithStaticSeed(-1.0f, 1.0f);
+			var y = RandomRangeWithStaticSeed(-1.0f, 1.0f);
+			var z = RandomRangeWithStaticSeed(-1.0f, 1.0f);
+
+			var v = new Vector3(x, y, z).Normalized();
+
+			if (Vector3.Dot(v, normal) < 0.0f)
+				return -v;
+
+			return v;
+		}
 	}
 }
