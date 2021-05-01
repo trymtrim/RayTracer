@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="KdTreeLib, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\KdTree.1.4.1\lib\net45\KdTreeLib.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>OpenTK\Release\OpenTK.dll</HintPath>
@@ -46,24 +49,43 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Source\Rendering\Photon.cs" />
+    <Compile Include="Source\Rendering\PhotonMapping.cs" />
+    <Compile Include="Source\Rendering\PhotonTracer.cs" />
+    <Compile Include="Source\Rendering\RayTracer.cs" />
+    <Compile Include="Source\Scene\BVH\AABB.cs" />
+    <Compile Include="Source\Scene\BVH\BVHNode.cs" />
+    <Compile Include="Source\Scene\BVH\BVH.cs" />
+    <Compile Include="Source\Scene\Camera.cs" />
     <Compile Include="Source\Game.cs" />
-    <Compile Include="Source\Ray.cs" />
-    <Compile Include="Source\SceneObjects\Light.cs" />
+    <Compile Include="Source\Config.cs" />
+    <Compile Include="Source\Rendering\PathTracer.cs" />
+    <Compile Include="Source\Scene\Material\Material.cs" />
+    <Compile Include="Source\Rendering\Ray.cs" />
+    <Compile Include="Source\Scene\Light.cs" />
     <Compile Include="Source\EntryPoint\Main.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Source\SceneObjects\Mesh.cs" />
-    <Compile Include="Source\SceneObjects\Polygon.cs" />
-    <Compile Include="Source\SceneObjects\Sphere.cs" />
-    <Compile Include="Source\Renderer.cs" />
-    <Compile Include="Source\Settings.cs" />
-    <Compile Include="Source\EntryPoint\Surface.cs" />
-    <Compile Include="Source\Utils\DebugWindow.cs" />
+    <Compile Include="Source\Scene\Material\Materials\DiffuseMaterial.cs" />
+    <Compile Include="Source\Scene\Material\Materials\ReflectionMaterial.cs" />
+    <Compile Include="Source\Scene\Material\Materials\ReflectionRefractionMaterial.cs" />
+    <Compile Include="Source\Scene\Material\Materials\RefractionMaterial.cs" />
+    <Compile Include="Source\Scene\Material\Materials\TransparentMaterial.cs" />
+    <Compile Include="Source\Scene\Mesh\Mesh.cs" />
+    <Compile Include="Source\Scene\Mesh\Meshes\Plane.cs" />
+    <Compile Include="Source\Scene\Scene.cs" />
+    <Compile Include="Source\Scene\Mesh\Meshes\Sphere.cs" />
+    <Compile Include="Source\Rendering\Renderer.cs" />
+    <Compile Include="Source\Rendering\RenderSettings.cs" />
+    <Compile Include="Source\Rendering\Surface.cs" />
+    <Compile Include="Source\Scene\Skybox.cs" />
+    <Compile Include="Source\UI\Button.cs" />
+    <Compile Include="Source\UI\UserInterface.cs" />
+    <Compile Include="Source\UI\DebugUI.cs" />
     <Compile Include="Source\Utils\MathHelper.cs" />
-    <Compile Include="Source\Utils\Vector2f.cs" />
-    <Compile Include="Source\Utils\Vector3f.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

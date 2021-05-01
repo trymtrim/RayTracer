@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 
 namespace RayTracerTestBed
@@ -12,12 +9,11 @@ namespace RayTracerTestBed
 	{
 		public int width, height;
 		public int[] pixels;
+
 		static private bool _fontReady = false;
 		static private Surface _font;
 		static private int[] _fontRedir;
 		static private string ch = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_-+={}[];:<>,.?/\\ ";
-
-		private Bitmap bmp;
 
 		public Surface(string fileName)
 		{
@@ -37,13 +33,11 @@ namespace RayTracerTestBed
 		//Initialization
 		public Surface()
 		{
-			_font = new Surface("../../assets/font.png");
+			_font = new Surface("../../Assets/Fonts/Font.png");
 		}
 
 		public void UpdateSurface(Bitmap bmp)
 		{
-			this.bmp = bmp;
-
 			width = bmp.Width;
 			height = bmp.Height;
 			pixels = new int[width * height];

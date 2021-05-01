@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 
@@ -21,16 +18,15 @@ namespace RayTracerTestBed
 			GL.Enable(EnableCap.Texture2D);
 			GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
-			Width = 640;
-			Height = 480;
+			_game = new Game();
+			_game.Init();
+
+			Width = Game.settings.width;
+			Height = Game.settings.height;
 
 			ClientSize = new Size(Width, Height); //(512, 512)
-			_game = new Game();
-			Renderer.screen = new Surface();
 
 			_screenID = Renderer.screen.GenTexture();
-
-			_game.Init();
 		}
 
 		//Called upon app close
@@ -55,12 +51,21 @@ namespace RayTracerTestBed
 
 			if (keyboard[OpenTK.Input.Key.Escape])
 				this.Exit();
+
+			_game.OnUpdateFrame(keyboard);
+		}
+		
+		protected override void OnMouseDown(MouseButtonEventArgs args)
+		{
+			_game.OnMouseButtonDown(new Vector2(args.X, args.Y));
 		}
 
 		//Called once per frame; render
 		protected override void OnRenderFrame(FrameEventArgs e)
 		{
 			_game.Tick();
+
+			_game.Render();
 
 			GL.BindTexture(TextureTarget.Texture2D, _screenID);
 			GL.TexImage2D(TextureTarget.Texture2D,
@@ -83,8 +88,7 @@ namespace RayTracerTestBed
 			GL.TexCoord2(1.0f, 0.0f); GL.Vertex2(1.0f, 1.0f);
 			GL.TexCoord2(0.0f, 0.0f); GL.Vertex2(-1.0f, 1.0f);
 			GL.End();
-
-			_game.Render();
+			
 			SwapBuffers();
 		}
 
