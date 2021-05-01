@@ -10,7 +10,7 @@
 		public const int PATH_TRACING_SAMPLES = 10;
 
 		//Default states
-		public const TraceMethod DEFAULT_TRACE_METHOD = TraceMethod.PhotonTracing;
+		public const TraceMethod DEFAULT_TRACE_METHOD = TraceMethod.WhittedRayTracing;
 		public const bool SHOW_UI_BY_DEFAULT = true;
 
 		//BVH
